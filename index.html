@@ -117,6 +117,12 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:-apple-system,"Ping
 .pb-keywords span{font-size:11px;padding:2px 8px;background:#eef6ff;border-radius:10px;color:var(--wt);animation:pop .3s}
 .pb-exit{text-align:center;margin-top:8px;font-size:13px;color:var(--accent);font-weight:600;opacity:0;transition:opacity .5s}
 .pb-exit.show{opacity:1}
+.pb-story-overlay{position:absolute;bottom:60px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.82);color:#fff;padding:10px 18px;border-radius:10px;font-size:14px;line-height:1.7;text-align:center;max-width:85%;z-index:5;pointer-events:none;animation:storyFade 2.5s ease forwards}
+@keyframes storyFade{0%{opacity:0;transform:translateX(-50%) translateY(8px)}15%{opacity:1;transform:translateX(-50%) translateY(0)}75%{opacity:1}100%{opacity:0;transform:translateX(-50%) translateY(-4px)}}
+.pb-prompt{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(10,10,30,.92);color:#fff;padding:18px 22px;border-radius:14px;font-size:15px;line-height:1.8;text-align:center;max-width:80%;z-index:6;pointer-events:none;animation:promptAnim 2.8s ease forwards;border:1px solid rgba(100,150,255,.2)}
+@keyframes promptAnim{0%{opacity:0;transform:translate(-50%,-50%) scale(.92)}12%{opacity:1;transform:translate(-50%,-50%) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(1)}}
+.pb-status{display:flex;justify-content:space-between;align-items:center;margin:6px 0;font:11px var(--mono);color:var(--textL)}
+.pb-status .top-emo{color:var(--wt);font-weight:600}
 
 /* ===== SLOT MACHINE 三牌老虎机 ===== */
 .sol-info{text-align:center;margin-bottom:12px}
@@ -151,6 +157,9 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:-apple-system,"Ping
 .slot-album-item .sa-text{flex:1;line-height:1.4}
 .slot-album-item .sa-tag{font-size:9px;padding:1px 6px;border-radius:8px;background:#eef6ff;color:var(--wt);flex-shrink:0}
 .sol-confirm{text-align:center;margin-top:12px}
+.slot-reel.locked{outline:2px solid #ff6b6b;outline-offset:-2px;opacity:.85}
+.slot-reel.locked::after{content:'🔒';position:absolute;top:4px;right:4px;font-size:12px;z-index:3}
+.sol-discover-bar{text-align:center;margin:4px 0;font-size:10px;color:var(--textL)}
 
 /* ===== MY DOCS ===== */
 .docs-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:12px 0}
@@ -276,8 +285,8 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:-apple-system,"Ping
     <div class="win" style="max-width:380px">
       <div class="win-t"><span>&#128163; 人生扫雷</span><div class="dots"><div class="d" onclick="backToDesk()">&#10005;</div></div></div>
       <div class="win-b" id="mine-body">
-        <div class="ms-info"><h3>收集人生碎片</h3><p>翻开格子收集碎片，避开危险格<br>收集 <strong>8</strong> 个碎片即可通关</p></div>
-        <div class="ms-stats"><span>已收集: <span id="ms-count">0</span>/8</span><span>剩余: <span id="ms-left">15</span></span></div>
+        <div class="ms-info"><h3>寻找人生碎片</h3><p>尽可能找到更多碎片，每一个都会影响最终存档</p></div>
+        <div class="ms-stats"><span>已收集: <span id="ms-count">0</span></span><span>剩余: <span id="ms-left">15</span></span></div>
         <div class="ms-grid" id="ms-grid"></div>
         <div class="ms-collected" id="ms-collected"></div>
         <div class="ms-dir" id="ms-dir"></div>
@@ -291,9 +300,11 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:-apple-system,"Ping
     <div class="win" style="max-width:400px">
       <div class="win-t"><span>&#127921; 平行人生落珠机</span><div class="dots"><div class="d" onclick="backToDesk()">&#10005;</div></div></div>
       <div class="win-b" id="pin-body">
-        <div class="pb-info"><h3>释放弹珠，捕获情绪能量</h3><p>点击画面上方选择落点，共5颗弹珠</p></div>
-        <div class="pb-score"><span>能量: <span id="pb-score">0</span></span><span>弹珠: <span id="pb-balls">5</span>/5</span></div>
-        <div class="pb-wrap"><canvas id="pachinko-canvas" width="340" height="480"></canvas></div>
+        <div class="pb-info"><h3>平行人生落珠机</h3><p>每颗弹珠代表一次未发生的人生机会</p></div>
+        <div class="pb-status"><span>弹珠: <span id="pb-balls">5</span> 颗</span><span class="top-emo" id="pb-top-emo">—</span><span>能量: <span id="pb-score">0</span></span></div>
+        <div class="pb-wrap" id="pb-wrap" style="position:relative">
+          <canvas id="pachinko-canvas" width="340" height="480"></canvas>
+        </div>
         <div class="pb-keywords" id="pb-kw"></div>
         <div class="pb-exit" id="pb-exit"></div>
         <div class="pb-launch"><button class="wbtn wbtn-p" id="pb-launch-btn" onclick="launchPachinkoBall()" style="width:100%;padding:12px">&#127921; 释放弹珠</button></div>
@@ -307,13 +318,17 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:-apple-system,"Ping
     <div class="win" style="max-width:400px">
       <div class="win-t"><span>&#127183; 平行人生三牌老虎机</span><div class="dots"><div class="d" onclick="backToDesk()">&#10005;</div></div></div>
       <div class="win-b" id="sol-body">
-        <div class="sol-info"><h3>拉动摇杆，抽取人生碎片</h3><p>三张相同触发稀有Jackpot！</p></div>
+        <div class="sol-info"><h3>平行人生三牌老虎机</h3><p>三张相同触发稀有人生！</p></div>
+        <div class="pb-status" style="justify-content:center;gap:12px"><span id="sol-discover" style="font-size:11px;color:var(--textL)">已发现 0/30 种平行人生</span><span id="sol-rewrite-info" style="font-size:11px;color:var(--wt);display:none">改写机会: <span id="sol-rewrite-count">1</span>次</span></div>
         <div class="slot-frame">
           <div class="slot-reels" id="slot-reels">
             <div class="slot-reel" id="slot-reel-0"><div class="slot-reel-strip" id="slot-strip-0"></div></div>
             <div class="slot-reel" id="slot-reel-1"><div class="slot-reel-strip" id="slot-strip-1"></div></div>
             <div class="slot-reel" id="slot-reel-2"><div class="slot-reel-strip" id="slot-strip-2"></div></div>
           </div>
+        </div>
+        <div id="sol-lock-area" style="text-align:center;margin:8px 0;display:none">
+          <button class="wbtn" id="sol-lock-btn" onclick="toggleLockCard()" style="padding:6px 14px;font-size:11px">&#128274; 锁定第一张再抽</button>
         </div>
         <div class="sol-confirm" id="sol-spin-wrap"><button class="wbtn wbtn-p" id="sol-spin-btn" style="width:100%;padding:14px;font-size:16px" onclick="spinSlot()">&#127920; 拉动摇杆</button></div>
         <div class="slot-result" id="sol-result" style="display:none">
@@ -350,14 +365,11 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:-apple-system,"Ping
     <div class="gen-box">
       <div class="gen-head"><div class="led"></div><span>PARALLEL_LIFE_RECOVERY v3.1</span></div>
       <div class="gen-body">
-        <div class="gen-line" id="gl0"><span class="cur"></span> 正在读取扫雷碎片...</div>
-        <div class="gen-line" id="gl1"><span class="cur"></span> 正在分析落珠能量...</div>
-        <div class="gen-line" id="gl2"><span class="cur"></span> 正在组合人生卡牌...</div>
-        <div class="gen-line" id="gl3"><span class="cur"></span> 正在恢复人物轮廓...</div>
-        <div class="gen-line" id="gl4"><span class="cur"></span> 正在匹配影像风格...</div>
-        <div class="gen-line" id="gl5"><span class="cur"></span> 检测到人物照片缺失...</div>
-        <div class="gen-line ok" id="gl6"><span class="cur" style="background:#00ff88"></span> &#10003; 平行人生存档已生成。</div>
-        <div class="gen-line err" id="gl7"><span class="cur" style="background:#ff6b6b"></span> &#9888; 需要真实照片以恢复完整影像。</div>
+        <div class="gen-line" id="gl0"><span class="cur"></span> 正在读取人生碎片与情绪能量...</div>
+        <div class="gen-line" id="gl1"><span class="cur"></span> 正在组合平行人生卡牌...</div>
+        <div class="gen-line" id="gl2"><span class="cur"></span> 正在恢复人物轮廓...</div>
+        <div class="gen-line ok" id="gl3"><span class="cur" style="background:#00ff88"></span> &#10003; 平行人生存档已生成。</div>
+        <div class="gen-line err" id="gl4"><span class="cur" style="background:#ff6b6b"></span> &#9888; 检测到人物照片缺失，需要真实照片以恢复完整影像。</div>
       </div>
       <div class="gen-bar"><div class="gen-bar-fill" id="gen-bar"></div></div>
     </div>
@@ -407,21 +419,21 @@ const G = {
 
 // ===== GAME DATA =====
 const MINE_ITEMS = [
-  { id:'uniform', icon:'🎓', name:'旧校服', dir:'youth' },
-  { id:'ticket', icon:'🎫', name:'车票', dir:'travel' },
-  { id:'camera', icon:'📷', name:'相机', dir:'travel' },
-  { id:'movie', icon:'🎬', name:'电影票', dir:'youth' },
-  { id:'pet', icon:'🐾', name:'宠物徽章', dir:'pet' },
-  { id:'magic', icon:'🔮', name:'魔法道具', dir:'fantasy' },
-  { id:'chip', icon:'💎', name:'未来芯片', dir:'future' },
-  { id:'photo', icon:'📸', name:'家庭照片', dir:'youth' },
-  { id:'polaroid', icon:'🎞️', name:'胶片相机', dir:'youth' },
-  { id:'postcard', icon:'💌', name:'旧明信片', dir:'travel' },
-  { id:'vr', icon:'🥽', name:'VR眼镜', dir:'future' },
-  { id:'scroll', icon:'📜', name:'古卷轴', dir:'fantasy' },
-  { id:'collar', icon:'🦴', name:'宠物项圈', dir:'pet' },
-  { id:'compass', icon:'🧭', name:'旧指南针', dir:'travel' },
-  { id:'diary', icon:'📔', name:'旧日记本', dir:'youth' }
+  { id:'uniform', icon:'🎓', name:'旧校服', dir:'youth', memo:'那年夏天没有留下合照' },
+  { id:'ticket', icon:'🎫', name:'车票', dir:'travel', memo:'这张车票通往你没有选择的人生' },
+  { id:'camera', icon:'📷', name:'相机', dir:'travel', memo:'镜头里的风景，你从未真正去过' },
+  { id:'movie', icon:'🎬', name:'电影票', dir:'youth', memo:'散场后你们没有再一起走过' },
+  { id:'pet', icon:'🐾', name:'宠物徽章', dir:'pet', memo:'有人一直停在你的旧相册里' },
+  { id:'magic', icon:'🔮', name:'魔法道具', dir:'fantasy', memo:'你曾经相信世界有另一种规则' },
+  { id:'chip', icon:'💎', name:'未来芯片', dir:'future', memo:'那个还没到来的明天，其实一直在等你' },
+  { id:'photo', icon:'📸', name:'家庭照片', dir:'youth', memo:'有些人的笑容你再也拍不到了' },
+  { id:'polaroid', icon:'🎞️', name:'胶片相机', dir:'youth', memo:'每一张胶片都是你来不及珍惜的瞬间' },
+  { id:'postcard', icon:'💌', name:'旧明信片', dir:'travel', memo:'寄出去的那句话，对方也许从没收到' },
+  { id:'vr', icon:'🥽', name:'VR眼镜', dir:'future', memo:'在虚拟世界里，你终于敢做真正的自己' },
+  { id:'scroll', icon:'📜', name:'古卷轴', dir:'fantasy', memo:'另一个你曾是某个古老故事的主角' },
+  { id:'collar', icon:'🦴', name:'宠物项圈', dir:'pet', memo:'它等了你很久，但你从没走回来' },
+  { id:'compass', icon:'🧭', name:'旧指南针', dir:'travel', memo:'方向一直都在，只是你不敢出发' },
+  { id:'diary', icon:'📔', name:'旧日记本', dir:'youth', memo:'写到最后几页时你突然停笔了' }
 ];
 const MINE_DANGER = [
   { id:'overtime', icon:'📢', name:'加班通知' },
@@ -480,31 +492,36 @@ const PACHINKO_SLOTS = [
   {id:'future',label:'未来生活',emoji:'🚀'}
 ];
 
+// Emotional prompts shown before each ball drops
+const PACHINKO_PROMPTS = [
+  '这一颗，替那个没有离开家乡的你出发。',
+  '这一颗，代表那句没有说出口的话。',
+  '这一颗，为那个还在犹豫的自己而投。',
+  '这一颗，替你去做那个没有做的梦。',
+  '这一颗，是最后一次机会，请认真瞄准。'
+];
+
+// Life story snippets shown on bumper collision
+const PACHINKO_STORY_MAP = {
+  free: ['你曾想过抛下一切，去一个没人认识你的地方。','自由不是你放弃了什么，而是你终于不再解释了。','那个背包还在衣柜里，但你从未真正出发。'],
+  together: ['有些人的陪伴你从没好好珍惜过。','你曾经有一个人，无论做什么都觉得安心。','如果当初多说一句话，结局也许会不同。'],
+  adventure: ['你曾站在某个路口，犹豫了很久。','那个你没有选择的冒险，一直在梦里等你。','人生最大的冒险，是允许自己犯错。'],
+  chill: ['你已经很久没有什么都不做地发呆了。','那个午后你什么也没想，但那天的风你记到现在。','松弛不是懒惰，是你终于放过自己。'],
+  seen: ['你一直渴望有人真正看见你的样子。','在某个人的眼里，你曾闪闪发光过。','被看见，是一种迟到了很久的温柔。'],
+  restart: ['你曾想过如果一切重来，你会怎么选。','重新开始不是逃避，是你终于决定不再将就。','那个你没有开始的计划，其实一直等着现在的你。'],
+  romance: ['你曾为一个人失眠过很多个夜晚。','那段没有结果的感情，教会了你什么是珍惜。','浪漫不是完美的爱情，是那些不完美里的心动。'],
+  curious: ['小时候你对什么都充满好奇。','好奇心是你身上最珍贵的部分，请不要弄丢它。','那个你没有追问的问题，也许才是最重要的答案。']
+};
+
 // ===== SCREEN NAV =====
 function go(id){document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));const t=document.getElementById(id);if(t)setTimeout(()=>t.classList.add('on'),30)}
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
 
 // ===== BOOT =====
 const BOOT_LINES = [
-  'LifeOS BIOS v2.4.1',
-  'Copyright (C) Parallel Life Systems Inc.',
-  '',
-  'Checking memory... 8192 MB OK',
-  'Detecting storage devices...',
-  '  > LifeDrive_0: 256 GB [OK]',
-  '  > MemoryCache: ACTIVE',
-  '',
-  'Loading LifeOS kernel...',
-  'Mounting /dev/parallel_lives... OK',
-  'Starting archive recovery service...',
-  '',
-  '╔══════════════════════════════════╗',
-  '║  ⚠ SCAN COMPLETE                ║',
-  '║  Found: 1 incomplete life       ║',
-  '║         archive in sector 0x7F   ║',
-  '╚══════════════════════════════════╝',
-  '',
-  'LifeOS ready.'
+  'LifeOS v3.1',
+  '正在读取人生存档...',
+  '发现一份未完成影像'
 ];
 
 (function runBoot(){
@@ -512,16 +529,26 @@ const BOOT_LINES = [
   const bar = document.getElementById('boot-bar');
   const msg = document.getElementById('boot-msg');
   const btn = document.getElementById('boot-enter');
+  // Check if returning user - skip boot
+  if(localStorage.getItem('lifeos_visited')){
+    el.textContent = 'LifeOS v3.1\n欢迎回来';
+    bar.style.width = '100%';
+    msg.textContent = '点击继续上次的人生';
+    msg.classList.add('show');
+    btn.classList.add('show');
+    btn.textContent = '▶ 继续';
+    return;
+  }
   let lineIdx = 0, charIdx = 0, text = '';
   const typeInterval = setInterval(() => {
     if(lineIdx >= BOOT_LINES.length){
       clearInterval(typeInterval);
       bar.style.width = '100%';
       setTimeout(()=>{
-        msg.textContent = '⚠ 检测到一份未完成的人生存档';
+        msg.textContent = '⚠ 点击进入，恢复这段人生';
         msg.classList.add('show');
-        setTimeout(()=> btn.classList.add('show'), 800);
-      }, 500);
+        btn.classList.add('show');
+      }, 300);
       return;
     }
     const line = BOOT_LINES[lineIdx];
@@ -532,14 +559,17 @@ const BOOT_LINES = [
     }
     el.textContent = text;
     bar.style.width = Math.min(90, (lineIdx / BOOT_LINES.length) * 90) + '%';
-  }, 25);
+  }, 40);
+  // Show skip button after 0.8s
+  setTimeout(()=>{ btn.classList.add('show'); }, 800);
 })();
 
 function enterDesk(){
+  localStorage.setItem('lifeos_visited','1');
   go('desk');
   renderDesktop();
   setTimeout(()=> showDeskPopup('⚠','LifeOS 系统通知',
-    '检测到一份未完成的人生存档。<br><br>这台电脑里，存着另一段从未发生过的人生。<br>通过三个小游戏，你可以逐步恢复它。<br><br><span style="font-size:11px;color:var(--textL)">完成三个游戏后，打开桌面上的「另一个我.jpg」</span>'), 500);
+    '这台电脑里，存着另一段从未发生过的人生。<br><br>通过三个小游戏，你可以逐步恢复它。<br><br><span style="font-size:11px;color:var(--textL)">完成三个游戏后，打开桌面上的「另一个我.jpg」</span>'), 500);
 }
 
 // ===== DESKTOP =====
@@ -548,8 +578,8 @@ function renderDesktop(){
   const allPlayed = G.unlocked.mine && G.unlocked.pin && G.unlocked.sol;
   const icons = [
     { id:'mine', icon:'💣', label:'人生扫雷', locked:false, played:G.unlocked.mine },
-    { id:'pin', icon:'🎱', label:'落珠机', locked:false, played:G.unlocked.pin },
-    { id:'sol', icon:'🎰', label:'三牌老虎机', locked:false, played:G.unlocked.sol },
+    { id:'pin', icon:'🎱', label:'落珠机', locked:!G.unlocked.mine, played:G.unlocked.pin },
+    { id:'sol', icon:'🎰', label:'三牌老虎机', locked:!G.unlocked.pin, played:G.unlocked.sol },
     { id:'docs', icon:'📁', label:'我的文档', locked:false, played:false },
     { id:'trash', icon:'🗑️', label:'回收站', locked:false, played:false },
     { id:'file', icon:'🖼️', label:'另一个我\n.jpg', locked:!allPlayed, played:false }
@@ -564,13 +594,19 @@ function renderDesktop(){
 
 function deskClick(id){
   if(id==='mine'){ go('mine-scr'); initMine(); }
-  else if(id==='pin'){ go('pin-scr'); initPin(); }
-  else if(id==='sol'){ go('sol-scr'); initSol(); }
+  else if(id==='pin'){
+    if(!G.unlocked.mine){ toast('先完成人生扫雷，才能解锁落珠机'); return; }
+    go('pin-scr'); initPin();
+  }
+  else if(id==='sol'){
+    if(!G.unlocked.pin){ toast('先完成落珠机，才能解锁三牌老虎机'); return; }
+    go('sol-scr'); initSol();
+  }
   else if(id==='docs'){ go('docs-scr'); renderDocs(); }
   else if(id==='trash'){ showDeskPopup('🗑️','回收站','这里空空如也。<br>也许有些人生，注定不会被丢掉。'); }
   else if(id==='file'){
     const allPlayed = G.unlocked.mine && G.unlocked.pin && G.unlocked.sol;
-    if(!allPlayed){ toast('先玩完三个小游戏，才能打开这个文件'); return; }
+    if(!allPlayed){ toast('先完成三个小游戏，才能打开这个文件'); return; }
     startGen();
   }
 }
@@ -593,11 +629,10 @@ function initMine(){
   document.getElementById('ms-retry').style.display = 'none';
   collected.innerHTML = '';
   dirEl.classList.remove('show');
+  dirEl.innerHTML = '';
   document.getElementById('ms-count').textContent = '0';
 
-  // Build grid: 15 items + 5 dangers, shuffle into 20 cells (5x4)
   let cells = [...MINE_ITEMS.map(m=>({...m,type:'item'})), ...MINE_DANGER.map(d=>({...d,type:'danger'}))];
-  // Shuffle
   for(let i=cells.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[cells[i],cells[j]]=[cells[j],cells[i]];}
 
   let count=0, left=15, gameOver=false;
@@ -617,47 +652,65 @@ function mineTap(el, idx){
   if(cell.type === 'danger'){
     el.classList.add('danger');
     s.gameOver = true;
-    // Reveal all
     document.querySelectorAll('.ms-cell').forEach(c=>c.classList.add('rev'));
-    // If collected some items before hitting danger, save them
-    if(s.collected.length > 0){
-      toast(`踩到了「${cell.name}」！已收集 ${s.collected.length} 个碎片`);
-      setTimeout(()=>{
-        saveMineResult();
-        document.getElementById('ms-done').style.display='block';
-        document.getElementById('ms-retry').style.display='inline-block';
-      }, 1200);
+
+    saveMineResult();
+    // Variable result based on collected count
+    const n = s.collected.length;
+    let story = '';
+    if(n === 0){
+      story = '你还没来得及看清，这段记忆就中断了。再试一次吧。';
+    } else if(n <= 3){
+      story = `你只来得及看见几个模糊的片段，但它们已经足够证明这段人生存在过。`;
+    } else if(n <= 6){
+      story = `这段人生已经出现了轮廓，只差一张属于你的照片。`;
     } else {
-      toast(`踩到了「${cell.name}」！再试一次吧`);
-      setTimeout(()=>{
-        document.getElementById('ms-retry').style.display='inline-block';
-      }, 800);
+      story = `你几乎恢复了整段人生，但人物影像仍然缺失。`;
     }
+
+    const dirEl = document.getElementById('ms-dir');
+    dirEl.innerHTML = `<strong>这段记忆在这里中断了。</strong><br><br>${story}<br><br>${generateMineStory(s.collected)}`;
+    dirEl.classList.add('show');
+
+    document.getElementById('ms-done').style.display='block';
+    document.getElementById('ms-retry').style.display='inline-block';
     return;
   }
 
-  // Item collected
+  // Item collected - show memory text
   s.count++;
   s.left--;
   s.collected.push(cell);
   document.getElementById('ms-count').textContent = s.count;
   document.getElementById('ms-left').textContent = s.left;
-  document.getElementById('ms-collected').innerHTML = s.collected.map(c=>`<span title="${c.name}">${c.icon}</span>`).join('');
+  document.getElementById('ms-collected').innerHTML = s.collected.map(c=>`<span title="${c.name}: ${c.memo||''}">${c.icon}</span>`).join('');
 
-  if(s.count >= 8){
+  // Show the memory text for this fragment
+  toast(`${cell.icon} ${cell.memo || cell.name}`);
+
+  // Check if all safe cells found
+  if(s.left <= 0){
     s.gameOver = true;
     saveMineResult();
+    const dirEl = document.getElementById('ms-dir');
+    dirEl.innerHTML = `<strong>你恢复了全部记忆碎片。</strong><br><br>这段人生已经完整浮现，但人物影像仍然缺失。<br><br>${generateMineStory(s.collected)}`;
+    dirEl.classList.add('show');
     document.getElementById('ms-done').style.display='block';
     document.getElementById('ms-retry').style.display='inline-block';
-    // Show direction
-    const dirCounts = {};
-    s.collected.forEach(c=>{ dirCounts[c.dir]=(dirCounts[c.dir]||0)+1; });
-    const topDir = Object.entries(dirCounts).sort((a,b)=>b[1]-a[1])[0][0];
-    G.mine.dir = topDir;
-    const dirEl = document.getElementById('ms-dir');
-    dirEl.innerHTML = `你的碎片指向：<strong>${DIR_MAP[topDir]}</strong>`;
-    dirEl.classList.add('show');
   }
+}
+
+function generateMineStory(collected){
+  if(!collected || !collected.length) return '';
+  const names = collected.map(c=>c.name);
+  // Pick first 3 for the story sentence
+  const picks = names.slice(0,3);
+  const templates = [
+    `${picks.join('＋')}：你最想找回的，是那段当时没有意识到会结束的青春。`,
+    `${picks.join('＋')}：这些碎片拼出了一个你差点忘记的自己。`,
+    `${picks.join('＋')}：每一件都证明，这段人生确实存在过。`
+  ];
+  return templates[Math.floor(Math.random()*templates.length)];
 }
 
 function saveMineResult(){
@@ -697,10 +750,14 @@ function initPin(){
   document.getElementById('pb-retry').style.display='none';
   document.getElementById('pb-score').textContent='0';
   document.getElementById('pb-balls').textContent='5';
+  document.getElementById('pb-top-emo').textContent='—';
   document.getElementById('pb-kw').innerHTML='';
   document.getElementById('pb-exit').classList.remove('show');
   document.getElementById('pb-launch-btn').style.display='block';
   document.getElementById('pb-launch-btn').innerHTML='&#127921; 释放弹珠';
+  // Remove any leftover overlays
+  const wrap = document.getElementById('pb-wrap');
+  if(wrap) wrap.querySelectorAll('.pb-story-overlay,.pb-prompt').forEach(e=>e.remove());
 
   const canvas = document.getElementById('pachinko-canvas');
   if(!canvas) return;
@@ -728,7 +785,7 @@ function initPin(){
     return {
       ...kw,
       x: 20 + col*colW, y: startY + row*rowH + rowH/2,
-      r: 18, hits:0, flash:0, scale:1
+      r: 20, hits:0, flash:0, scale:1
     };
   });
 
@@ -738,7 +795,7 @@ function initPin(){
     ...s, x:10+i*slotW, y:H-38, w:slotW-4, h:30
   }));
 
-  // Slot dividers (walls between slots)
+  // Slot dividers
   const dividers = [];
   for(let i=1; i<4; i++){
     dividers.push({ x: 10+i*slotW-2, y: H-55, w:4, h:47 });
@@ -747,7 +804,10 @@ function initPin(){
   window._pk = { ctx, W, H, pegs, bumpers, slots, dividers,
     ball:null, balls:[], trail:[], particles:[],
     energy:{}, total:0, ballsLeft:5, ballsDropped:0,
-    running:false, aimX:W/2, dropReady:true };
+    running:false, aimX:W/2, dropReady:true,
+    // Anti-stuck tracking
+    stuckTimer:0, lastPos:{x:0,y:0}, stuckPushCount:0
+  };
   drawPachinko();
 }
 
@@ -794,19 +854,19 @@ function drawPachinko(){
     const glow = b.flash>0;
     // Outer glow
     if(glow){
-      ctx.beginPath();ctx.arc(b.x,b.y,r+6,0,Math.PI*2);
+      ctx.beginPath();ctx.arc(b.x,b.y,r+8,0,Math.PI*2);
       ctx.fillStyle=b.color+'33';ctx.fill();
     }
     // Main
     ctx.beginPath();ctx.arc(b.x,b.y,r,0,Math.PI*2);
     ctx.fillStyle=glow?b.color:b.color+'88';ctx.fill();
     ctx.strokeStyle=glow?'#fff':b.color;ctx.lineWidth=1.5;ctx.stroke();
-    // Emoji
-    ctx.fillStyle='#fff';ctx.font='12px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillText(b.emoji,b.x,b.y-1);
-    // Label
-    ctx.font='7px sans-serif';ctx.fillStyle='rgba(255,255,255,.5)';
-    ctx.fillText(b.label,b.x,b.y+r+8);
+    // Emoji (bigger)
+    ctx.fillStyle='#fff';ctx.font='15px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(b.emoji,b.x,b.y-2);
+    // Label (bigger)
+    ctx.font='bold 10px sans-serif';ctx.fillStyle=glow?'#fff':'rgba(255,255,255,.65)';
+    ctx.fillText(b.label,b.x,b.y+r+10);
     if(b.flash>0) b.flash--;
     if(sc>1) b.scale=Math.max(1,sc-0.04);
   });
@@ -817,14 +877,15 @@ function drawPachinko(){
     ctx.fillRect(d.x,d.y,d.w,d.h);
   });
 
-  // Bottom slots
+  // Bottom slots (bigger text)
   p.slots.forEach(s=>{
     ctx.fillStyle='#141e33';
     ctx.strokeStyle='#2a4a6a';ctx.lineWidth=1.5;
     rr(ctx,s.x,s.y,s.w,s.h,4);ctx.fill();ctx.stroke();
-    ctx.fillStyle='#6688aa';ctx.font='8px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillStyle='#7799bb';ctx.font='11px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
     ctx.fillText(s.emoji,s.x+s.w/2,s.y+s.h/2-6);
-    ctx.fillText(s.label,s.x+s.w/2,s.y+s.h/2+6);
+    ctx.font='bold 9px sans-serif';
+    ctx.fillText(s.label,s.x+s.w/2,s.y+s.h/2+7);
   });
 
   // Particles
@@ -865,12 +926,29 @@ function drawPachinko(){
 function launchPachinkoBall(){
   const p = window._pk;
   if(!p || p.ball || p.ballsLeft<=0) return;
-  p.ball = { x:p.aimX, y:18, vx:(Math.random()-0.5)*1.5, vy:1, r:PK_BALL_R };
-  p.running = true;
-  p.dropReady = false;
-  p.trail = [];
+  // Show emotional prompt
+  const promptIdx = Math.min(p.ballsDropped, PACHINKO_PROMPTS.length-1);
+  const wrap = document.getElementById('pb-wrap');
+  // Remove old prompts
+  wrap.querySelectorAll('.pb-prompt').forEach(e=>e.remove());
+  const promptEl = document.createElement('div');
+  promptEl.className = 'pb-prompt';
+  promptEl.textContent = PACHINKO_PROMPTS[promptIdx];
+  wrap.appendChild(promptEl);
+  // Delay ball launch until prompt fades
   document.getElementById('pb-launch-btn').style.display='none';
-  _pachRAF = requestAnimationFrame(pachinkoLoop);
+  setTimeout(()=>{
+    if(!p || p.ball) return;
+    p.ball = { x:p.aimX, y:18, vx:(Math.random()-0.5)*1.5, vy:1, r:PK_BALL_R };
+    p.running = true;
+    p.dropReady = false;
+    p.trail = [];
+    p.stuckTimer = 0;
+    p.lastPos = {x:p.ball.x, y:p.ball.y};
+    p.stuckPushCount = 0;
+    _pachRAF = requestAnimationFrame(pachinkoLoop);
+    if(promptEl.parentNode) promptEl.remove();
+  }, 2200);
 }
 
 function pachinkoLoop(){
@@ -883,6 +961,33 @@ function pachinkoLoop(){
     b.vx *= 0.998;
     b.x += b.vx;
     b.y += b.vy;
+
+    // Anti-stuck detection
+    const dx_stuck = b.x - p.lastPos.x, dy_stuck = b.y - p.lastPos.y;
+    const moved = Math.sqrt(dx_stuck*dx_stuck + dy_stuck*dy_stuck);
+    if(moved < 0.5){
+      p.stuckTimer += 16; // ~60fps → ~16ms per frame
+    } else {
+      p.stuckTimer = 0;
+      p.stuckPushCount = 0;
+    }
+    p.lastPos = {x:b.x, y:b.y};
+
+    // After 1.5s stuck → gentle push down + random side
+    if(p.stuckTimer > 1500 && p.stuckPushCount < 3){
+      b.vy += 3;
+      b.vx += (Math.random()-0.5)*4;
+      p.stuckPushCount++;
+      p.stuckTimer = 1000; // Reset partially so it tries push again if still stuck
+    }
+    // After 3s stuck → teleport to nearest safe position below
+    if(p.stuckTimer > 3000){
+      b.y += 40;
+      b.vy = 2;
+      b.vx = (Math.random()-0.5)*3;
+      p.stuckTimer = 0;
+      p.stuckPushCount = 0;
+    }
 
     // Trail
     p.trail.push({x:b.x,y:b.y,life:0.6});
@@ -911,7 +1016,7 @@ function pachinkoLoop(){
       }
     });
 
-    // Keyword bumper collisions (bouncy + score)
+    // Keyword bumper collisions (bouncy + score + story overlay)
     p.bumpers.forEach(bmp=>{
       const dx=b.x-bmp.x, dy=b.y-bmp.y;
       const dist=Math.sqrt(dx*dx+dy*dy);
@@ -921,7 +1026,6 @@ function pachinkoLoop(){
         const dot=b.vx*nx+b.vy*ny;
         b.vx-=2*dot*nx;
         b.vy-=2*dot*ny;
-        // Boost bounce
         b.vx*=1.1;b.vy*=1.1;
         b.x+=nx*(minD-dist+1);
         b.y+=ny*(minD-dist+1);
@@ -931,11 +1035,14 @@ function pachinkoLoop(){
         p.total+=10;
         document.getElementById('pb-score').textContent=p.total;
         updatePachinkoKeywords();
+        updateTopEmotion();
+        // Show story overlay
+        showPachinkoStory(bmp.id, bmp.label);
         // Particles
-        for(let i=0;i<4;i++){
+        for(let i=0;i<5;i++){
           p.particles.push({x:bmp.x+nx*bmp.r,y:bmp.y+ny*bmp.r,
             vx:(Math.random()-0.5)*3+nx*2,vy:(Math.random()-0.5)*3+ny*2,
-            r:1.5+Math.random()*1.5,life:1,color:bmp.color});
+            r:1.5+Math.random()*2,life:1,color:bmp.color});
         }
       }
     });
@@ -969,28 +1076,23 @@ function pachinkoLoop(){
         if(b.x>s.x && b.x<s.x+s.w) hitSlot=s;
       });
       if(!hitSlot) hitSlot=p.slots[Math.floor(Math.random()*p.slots.length)];
-      // Record
       p.balls.push({slot:hitSlot.id, energy:{...p.energy}});
       p.ballsLeft--;
       p.ballsDropped++;
       p.ball=null;
       p.running=false;
       p.trail=[];
-      document.getElementById('pb-balls').textContent=5-p.ballsDropped;
-      // Flash the slot
+      document.getElementById('pb-balls').textContent=p.ballsLeft;
       drawPachinko();
-      // Highlight landed slot
       const {ctx}=p;
       ctx.fillStyle='rgba(255,200,0,.3)';
       ctx.fillRect(hitSlot.x,hitSlot.y,hitSlot.w,hitSlot.h);
 
       if(p.ballsLeft>0){
-        // More balls to drop
         p.dropReady=true;
         document.getElementById('pb-launch-btn').style.display='block';
         document.getElementById('pb-launch-btn').innerHTML='&#127921; 释放弹珠 ('+p.ballsLeft+'颗)';
       } else {
-        // All balls done
         finishPachinkoRound();
       }
       _pachRAF=null;
@@ -999,6 +1101,32 @@ function pachinkoLoop(){
     drawPachinko();
   }catch(e){console.error('Pachinko error:',e);p.running=false;}
   if(p.running) _pachRAF=requestAnimationFrame(pachinkoLoop);
+}
+
+// Show story overlay when ball hits a bumper
+function showPachinkoStory(keywordId, label){
+  const stories = PACHINKO_STORY_MAP[keywordId];
+  if(!stories || !stories.length) return;
+  const text = stories[Math.floor(Math.random()*stories.length)];
+  const wrap = document.getElementById('pb-wrap');
+  // Remove existing overlays
+  wrap.querySelectorAll('.pb-story-overlay').forEach(e=>e.remove());
+  const el = document.createElement('div');
+  el.className = 'pb-story-overlay';
+  el.innerHTML = `<strong>${label}</strong>：${text}`;
+  wrap.appendChild(el);
+  setTimeout(()=>{ if(el.parentNode) el.remove(); }, 2600);
+}
+
+// Update top emotion display
+function updateTopEmotion(){
+  const p = window._pk;
+  if(!p) return;
+  const sorted = Object.entries(p.energy).sort((a,b)=>b[1]-a[1]);
+  if(sorted.length){
+    const kw = PACHINKO_KEYWORDS.find(k=>k.id===sorted[0][0]);
+    if(kw) document.getElementById('pb-top-emo').textContent = kw.emoji + ' ' + kw.label;
+  }
 }
 
 function updatePachinkoKeywords(){
@@ -1030,10 +1158,28 @@ function finishPachinkoRound(){
   G.unlocked.pin=true;
 
   const exitEl=document.getElementById('pb-exit');
-  exitEl.innerHTML=`${emoInfo?emoInfo.emoji:'🕊️'} 最强能量：<strong>${emoInfo?emoInfo.label:'自由'}</strong><br>${slotInfo?slotInfo.emoji:'📸'} 落入：<strong>${slotInfo?slotInfo.label:'真实补拍'}</strong>`;
+  exitEl.innerHTML=`<div style="font-size:15px;margin-bottom:6px">${emoInfo?emoInfo.emoji:'🕊️'} 这段人生最强的能量：<strong>${emoInfo?emoInfo.label:'自由'}</strong></div>` +
+    `<div style="font-size:14px;margin-bottom:6px">${slotInfo?slotInfo.emoji:'📸'} 弹珠替你选择了：<strong>${slotInfo?slotInfo.label:'真实补拍'}</strong></div>` +
+    `<div style="font-size:12px;color:var(--textL);line-height:1.7">共投出 ${p.ballsDropped} 颗弹珠，积攒了 ${p.total} 点能量。<br>${getPachinkoEndStory(topId, topSlot)}</div>`;
   exitEl.classList.add('show');
   document.getElementById('pb-done').style.display='block';
   document.getElementById('pb-retry').style.display='inline-block';
+}
+
+function getPachinkoEndStory(emoId, slotId){
+  const stories = {
+    'free_real': '你带着自由的渴望，选择了把那些没拍下的照片补回来。',
+    'free_other': '你向往自由，而另一条路上的你正在过着你偶尔梦到的生活。',
+    'together_real': '你最想补拍的，是和那个人的一张合照。',
+    'together_other': '在另一段人生里，你们没有走散。',
+    'adventure_other': '那个你没有选择的冒险，在另一条路上终于发生了。',
+    'restart_real': '你选择了重新开始，从最真实的自己开始。',
+    'romance_fantasy': '在那段幻想的人生里，你终于拥有了完整的浪漫。',
+    'curious_future': '带着好奇心，你走向了那个还没到来的明天。',
+    'seen_real': '你希望被看见，从最真实的样子开始。'
+  };
+  const key = emoId+'_'+slotId;
+  return stories[key] || `${PACHINKO_KEYWORDS.find(k=>k.id===emoId)?.label||'自由'}的能量指引你走向了${PACHINKO_SLOTS.find(s=>s.id===slotId)?.label||'真实补拍'}。`;
 }
 
 function retryPachinko(){
@@ -1048,10 +1194,48 @@ function initSol(){
   document.getElementById('sol-result').style.display='none';
   document.getElementById('sol-album').style.display='none';
   document.getElementById('sol-spin-btn').style.display='block';
-  // Reset reels to show random cards
-  for(let i=0;i<3;i++) showReelCard(i, SLOT_CARDS[Math.floor(Math.random()*SLOT_CARDS.length)]);
-  window._slot = { spinning:false, results:[], album:[] };
+  document.getElementById('sol-spin-btn').innerHTML='&#127920; 拉动摇杆';
+  document.getElementById('sol-lock-area').style.display='none';
+  document.getElementById('sol-rewrite-info').style.display='none';
+  // Remove locked class from all reels
+  for(let i=0;i<3;i++){
+    document.getElementById('slot-reel-'+i).classList.remove('locked');
+    showReelCard(i, SLOT_CARDS[Math.floor(Math.random()*SLOT_CARDS.length)]);
+  }
+  window._slot = { spinning:false, results:[], album:[], lockedReel:-1, spinCount:0, rewriteUsed:0, discovered:new Set() };
+  // Restore discovered from G
+  if(G.sol.album && G.sol.album.length){
+    G.sol.album.forEach(e=>{
+      if(e.cards) e.cards.forEach(c=>{ if(c.id) window._slot.discovered.add(c.id); });
+    });
+  }
+  updateDiscovery();
   G.sol.currentCards=[];
+}
+
+function updateDiscovery(){
+  const s = window._slot;
+  if(!s) return;
+  const count = s.discovered.size;
+  document.getElementById('sol-discover').textContent = `已发现 ${count}/24 种人生碎片`;
+}
+
+function toggleLockCard(){
+  const s = window._slot;
+  if(!s || s.spinning) return;
+  if(s.lockedReel >= 0){
+    // Unlock
+    document.getElementById('slot-reel-'+s.lockedReel).classList.remove('locked');
+    s.lockedReel = -1;
+    document.getElementById('sol-lock-btn').innerHTML='&#128274; 锁定第一张再抽';
+    toast('已取消锁定');
+  } else {
+    // Lock first reel
+    s.lockedReel = 0;
+    document.getElementById('slot-reel-0').classList.add('locked');
+    document.getElementById('sol-lock-btn').innerHTML='&#128275; 已锁定，点击取消';
+    toast('已锁定第一张卡牌');
+  }
 }
 
 function showReelCard(reelIdx, card){
@@ -1067,29 +1251,55 @@ function spinSlot(){
   window._slot.spinning=true;
   document.getElementById('sol-result').style.display='none';
   document.getElementById('sol-spin-btn').style.display='none';
+  document.getElementById('sol-lock-area').style.display='none';
 
   // Pick 3 random results
-  const results=[
+  let results=[
     SLOT_CARDS[Math.floor(Math.random()*SLOT_CARDS.length)],
     SLOT_CARDS[Math.floor(Math.random()*SLOT_CARDS.length)],
     SLOT_CARDS[Math.floor(Math.random()*SLOT_CARDS.length)]
   ];
 
-  // Start all reels spinning
-  for(let i=0;i<3;i++) startReelSpin(i);
+  // If a reel is locked, keep its current card
+  const s = window._slot;
+  if(s.lockedReel >= 0){
+    const lockedCard = s.results[s.lockedReel] || SLOT_CARDS[0];
+    results[s.lockedReel] = lockedCard;
+  }
 
-  // Stop reels sequentially
-  setTimeout(()=>stopReel(0,results[0]), 1200);
-  setTimeout(()=>stopReel(1,results[1]), 2000);
+  // Start spinning - skip locked reel
+  for(let i=0;i<3;i++){
+    if(s.lockedReel === i) continue;
+    startReelSpin(i);
+  }
+
+  // Stop reels sequentially (skip locked)
+  const delays = [1200, 2000, 2800];
+  for(let i=0;i<3;i++){
+    if(s.lockedReel === i) continue;
+    const delay = i===0?1200:i===1?2000:2800;
+    setTimeout(((idx,card)=>()=>stopReel(idx,card))(i,results[i]), delay);
+  }
+
+  // Final result
+  const finalDelay = s.lockedReel===2 ? 2100 : s.lockedReel===1 ? 2900 : 3500;
   setTimeout(()=>{
-    stopReel(2,results[2]);
-    setTimeout(()=>{
-      window._slot.spinning=false;
-      window._slot.results=results;
-      G.sol.currentCards=results;
-      showSlotResult(results);
-    },700);
-  }, 2800);
+    window._slot.spinning=false;
+    window._slot.results=results;
+    window._slot.spinCount++;
+    G.sol.currentCards=results;
+    // Track discovered cards
+    results.forEach(c=>{ if(c.id) window._slot.discovered.add(c.id); });
+    updateDiscovery();
+    // Show lock area for next spin
+    document.getElementById('sol-lock-area').style.display='block';
+    // Show rewrite chance after 3 spins
+    if(window._slot.spinCount >= 3 && window._slot.rewriteUsed < 1){
+      document.getElementById('sol-rewrite-info').style.display='inline';
+      document.getElementById('sol-rewrite-count').textContent = '1';
+    }
+    showSlotResult(results);
+  }, finalDelay);
 }
 
 function startReelSpin(idx){
@@ -1141,16 +1351,16 @@ function showSlotResult(cards){
   let level, levelClass, interpretation, preview;
 
   if(allSame){
-    level='JACKPOT';
+    level='稀有人生';
     levelClass='jackpot';
     const c=cards[0];
     interpretation=`三张「${c.text}」！触发稀有人生！`;
     preview=`在${getPlaceForCard(c)}的世界里，你以${getIdentityForCard(c)}的身份，永远停留在${getTimeForCard(c)}。这是一段${getEmoForCard(c)}的人生。`;
     // Jackpot glow on all reels
     for(let i=0;i<3;i++) document.getElementById('slot-reel-'+i).classList.add('jackpot');
-    toast('JACKPOT！三张相同！');
+    toast('稀有人生！三张相同！');
   } else if(twoSame){
-    level='成对';
+    level='强化人生';
     levelClass='pair';
     let pairCard, oddCard;
     if(ids[0]===ids[1]){pairCard=cards[0];oddCard=cards[2];}
@@ -1159,7 +1369,7 @@ function showSlotResult(cards){
     interpretation=`「${pairCard.text}」× 2 + 「${oddCard.text}」`;
     preview=`${pairCard.text}的愿望被强化了。而「${oddCard.text}」为这段人生带来了意想不到的转折。`;
   } else {
-    level='混合人生';
+    level='多彩人生';
     levelClass='mix';
     interpretation=`${cards[0].icon} ${cards[0].text} ＋ ${cards[1].icon} ${cards[1].text} ＋ ${cards[2].icon} ${cards[2].text}`;
     preview=generateMixPreview(cards);
@@ -1171,11 +1381,51 @@ function showSlotResult(cards){
   document.getElementById('sol-spin-btn').style.display='block';
   document.getElementById('sol-spin-btn').innerHTML='&#127920; 再拉一次';
 
+  // Build action buttons - include rewrite chance if available
+  let extraBtns = '';
+  if(window._slot && window._slot.spinCount >= 3 && window._slot.rewriteUsed < 1){
+    extraBtns = `<button class="wbtn" onclick="rewriteSlot()" style="padding:8px 16px">&#9999; 改写一张</button>`;
+  }
+  const btnWrap = resultEl.querySelector('div[style*="flex"]');
+  if(btnWrap){
+    btnWrap.innerHTML = extraBtns +
+      `<button class="wbtn" onclick="favSlot()" style="padding:8px 16px">&#11088; 收藏</button>` +
+      `<button class="wbtn" onclick="spinSlot()" style="padding:8px 16px">&#128260; 再抽一次</button>` +
+      `<button class="wbtn wbtn-p" onclick="selectSlotLife()" style="padding:8px 16px">&#9654; 选择这段人生</button>`;
+  }
+
   // Add to album
   const entry={cards:[...cards], level, interpretation, preview, time:Date.now()};
   window._slot.album.push(entry);
   G.sol.album=[...window._slot.album];
   renderSlotAlbum();
+}
+
+// Rewrite chance: let user pick one reel to re-spin
+function rewriteSlot(){
+  if(!window._slot || window._slot.rewriteUsed >= 1) return;
+  window._slot.rewriteUsed++;
+  document.getElementById('sol-rewrite-info').style.display='none';
+  toast('点击一张卡牌来改写它');
+  const reels = document.querySelectorAll('.slot-reel');
+  const handler = function(e){
+    const reel = e.target.closest('.slot-reel');
+    if(!reel) return;
+    const idx = parseInt(reel.id.split('-')[2]);
+    const newCard = SLOT_CARDS[Math.floor(Math.random()*SLOT_CARDS.length)];
+    startReelSpin(idx);
+    setTimeout(()=>{
+      stopReel(idx, newCard);
+      const results = [...window._slot.results];
+      results[idx] = newCard;
+      window._slot.results = results;
+      window._slot.discovered.add(newCard.id);
+      updateDiscovery();
+      setTimeout(()=> showSlotResult(results), 700);
+    }, 1000);
+    reels.forEach(r=>r.removeEventListener('click', handler));
+  };
+  reels.forEach(r=>r.addEventListener('click', handler));
 }
 
 function generateMixPreview(cards){
@@ -1215,12 +1465,14 @@ function selectSlotLife(){
   if(!window._slot||!window._slot.results.length) return;
   G.sol.selectedLife=[...window._slot.results];
   G.unlocked.sol=true;
-  G.unlocked.file=true;
   backToDesk();
   toast('已选择这段人生');
-  setTimeout(()=>{
-    showDeskPopup('🖼️','文件已解锁','「另一个我.jpg」已解锁！<br>点击桌面上的文件图标，恢复这段人生。');
-  },800);
+  const allPlayed = G.unlocked.mine && G.unlocked.pin && G.unlocked.sol;
+  if(allPlayed){
+    setTimeout(()=>{
+      showDeskPopup('🖼️','文件已解锁','「另一个我.jpg」已解锁！<br>点击桌面上的文件图标，恢复这段人生。');
+    },800);
+  }
 }
 
 function renderSlotAlbum(){
@@ -1230,9 +1482,9 @@ function renderSlotAlbum(){
   const list=document.getElementById('slot-album-list');
   list.innerHTML=album.map((entry,i)=>{
     const icons=entry.cards.map(c=>c.icon).join('');
-    const tag=entry.level==='JACKPOT'?'<span class="sa-tag" style="background:#fff3e0;color:#bf360c">JP</span>':
-              entry.level==='成对'?'<span class="sa-tag" style="background:#fff3e0;color:#e65100">对</span>':
-              '<span class="sa-tag">混</span>';
+    const tag=entry.level==='稀有人生'?'<span class="sa-tag" style="background:#fff3e0;color:#bf360c">稀有</span>':
+              entry.level==='强化人生'?'<span class="sa-tag" style="background:#fff3e0;color:#e65100">强化</span>':
+              '<span class="sa-tag">多彩</span>';
     return `<div class="slot-album-item"><span class="sa-icons">${icons}</span><span class="sa-text">${entry.interpretation}</span>${tag}</div>`;
   }).reverse().join('');
 }
@@ -1259,7 +1511,7 @@ function renderDocs(){
 // ===== FAKE GENERATION =====
 function startGen(){
   go('gen');
-  const lines = ['gl0','gl1','gl2','gl3','gl4','gl5','gl6','gl7'];
+  const lines = ['gl0','gl1','gl2','gl3','gl4'];
   const bar = document.getElementById('gen-bar');
   lines.forEach(id => document.getElementById(id).classList.remove('show'));
   bar.style.width = '0%';
@@ -1272,9 +1524,9 @@ function startGen(){
       step++;
     } else {
       clearInterval(iv);
-      setTimeout(()=>{ buildResult(); go('result'); showResultCards(); }, 1000);
+      setTimeout(()=>{ buildResult(); go('result'); showResultCards(); }, 600);
     }
-  }, 1000);
+  }, 500);
 }
 
 // ===== RESULT =====
