@@ -104,13 +104,13 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:-apple-system,"Ping
 .ms-dir{text-align:center;margin-top:10px;padding:8px;background:#eef6ff;border-radius:8px;font-size:12px;color:var(--wt);line-height:1.6;opacity:0;transition:opacity .5s}
 .ms-dir.show{opacity:1}
 
-/* ===== PINBALL ===== */
+/* ===== PACHINKO 落珠机 ===== */
 .pb-wrap{position:relative;width:100%;max-width:360px;margin:0 auto}
 .pb-info{text-align:center;margin-bottom:10px}
 .pb-info h3{font-size:15px;color:var(--text);margin-bottom:4px}
 .pb-info p{font-size:12px;color:var(--textL)}
 .pb-score{display:flex;justify-content:space-around;margin:8px 0;font:bold 12px var(--mono)}
-#pinball-canvas{width:100%;border:2px solid var(--wk);background:#1a1a2e;border-radius:4px;display:block;touch-action:none}
+#pachinko-canvas{width:100%;border:2px solid var(--wk);background:#0e0e1e;border-radius:4px;display:block;touch-action:none}
 .pb-launch{text-align:center;margin-top:10px}
 .pb-launch .wbtn{width:100%;padding:12px;font-size:14px}
 .pb-keywords{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;margin-top:8px;min-height:24px}
@@ -118,26 +118,38 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:-apple-system,"Ping
 .pb-exit{text-align:center;margin-top:8px;font-size:13px;color:var(--accent);font-weight:600;opacity:0;transition:opacity .5s}
 .pb-exit.show{opacity:1}
 
-/* ===== SOLITAIRE ===== */
+/* ===== SLOT MACHINE 三牌老虎机 ===== */
 .sol-info{text-align:center;margin-bottom:12px}
 .sol-info h3{font-size:15px;color:var(--text);margin-bottom:4px}
 .sol-info p{font-size:12px;color:var(--textL);line-height:1.6}
-.sol-step{display:flex;justify-content:center;gap:4px;margin:8px 0}
-.sol-step .dot{width:8px;height:8px;border-radius:50%;background:#ddd;transition:all .3s}
-.sol-step .dot.done{background:var(--wt)}
-.sol-step .dot.cur{background:var(--accent);transform:scale(1.3)}
-.sol-cat-title{text-align:center;font-size:14px;font-weight:700;color:var(--text);margin:10px 0 6px}
-.sol-cards{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
-.sol-card{background:#fff;border:2px solid #e0dcd4;border-radius:10px;padding:12px 10px;cursor:pointer;text-align:center;transition:all .2s;position:relative}
-.sol-card:active,.sol-card.sel{border-color:var(--wt);background:#eef6ff;transform:scale(.97)}
-.sol-card .sc-icon{font-size:26px;margin-bottom:4px}
-.sol-card .sc-text{font-size:12px;color:var(--text);line-height:1.4}
-.sol-card .sc-rec{position:absolute;top:4px;right:6px;font-size:9px;color:var(--accent);font-weight:700}
-.sol-template{background:var(--paper);border:2px dashed #ccc;border-radius:10px;padding:14px;margin-top:12px;text-align:center}
-.sol-template .tpl-title{font-size:11px;color:var(--textL);margin-bottom:8px;letter-spacing:1px}
-.sol-template .tpl-slots{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
-.sol-template .slot{font-size:11px;padding:4px 10px;background:#eef6ff;border-radius:8px;color:var(--wt)}
-.sol-template .slot.empty{background:#f0ebe3;color:#ccc;border:1px dashed #ccc}
+.slot-frame{background:linear-gradient(180deg,#2c1810,#1a0e08);border:3px solid #8b6914;border-radius:12px;padding:16px 10px;margin:10px 0;position:relative;box-shadow:inset 0 0 20px rgba(0,0,0,.5),0 4px 16px rgba(0,0,0,.3)}
+.slot-frame::before{content:'';position:absolute;inset:-6px;border:2px solid rgba(139,105,20,.3);border-radius:16px;pointer-events:none}
+.slot-reels{display:flex;gap:8px;justify-content:center}
+.slot-reel{width:90px;height:100px;overflow:hidden;background:linear-gradient(180deg,#fff,#f8f6f2);border:2px solid #d4cfc4;border-radius:8px;position:relative;box-shadow:inset 0 0 10px rgba(0,0,0,.08)}
+.slot-reel::before,.slot-reel::after{content:'';position:absolute;left:0;right:0;height:20px;z-index:2;pointer-events:none}
+.slot-reel::before{top:0;background:linear-gradient(180deg,rgba(255,255,255,.9),transparent)}
+.slot-reel::after{bottom:0;background:linear-gradient(0deg,rgba(255,255,255,.9),transparent)}
+.slot-reel-strip{display:flex;flex-direction:column;transition:transform .1s}
+.slot-card-item{width:90px;height:100px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;border-bottom:1px solid #eee}
+.slot-card-item .sc-emoji{font-size:32px;line-height:1}
+.slot-card-item .sc-name{font-size:10px;color:var(--text);margin-top:4px;text-align:center;line-height:1.3}
+.slot-reel.spinning .slot-reel-strip{transition:none}
+.slot-reel.stopping .slot-reel-strip{transition:transform .6s cubic-bezier(.2,.8,.3,1.2)}
+.slot-reel.jackpot{animation:jackpotGlow .5s ease infinite alternate}
+@keyframes jackpotGlow{from{box-shadow:inset 0 0 10px rgba(255,200,0,.3),0 0 8px rgba(255,200,0,.2)}to{box-shadow:inset 0 0 20px rgba(255,200,0,.5),0 0 16px rgba(255,200,0,.4)}}
+.slot-result{background:var(--paper);border:2px solid #e0dcd4;border-radius:10px;padding:14px;margin-top:12px;animation:popIn .4s ease}
+.slot-combo{font-size:13px;color:var(--text);line-height:1.8;text-align:center}
+.slot-combo .combo-level{display:inline-block;padding:2px 10px;border-radius:12px;font-size:11px;font-weight:700;margin-bottom:6px}
+.slot-combo .combo-level.mix{background:#eef6ff;color:var(--wt)}
+.slot-combo .combo-level.pair{background:#fff3e0;color:#e65100}
+.slot-combo .combo-level.jackpot{background:linear-gradient(135deg,#fff3e0,#ffe0b2);color:#bf360c;animation:pulse 1s infinite}
+.slot-preview{font-size:12px;color:var(--textL);text-align:center;margin-top:8px;line-height:1.7;padding:8px;background:rgba(0,0,0,.02);border-radius:8px}
+.slot-album{margin-top:14px;background:var(--paper);border:2px dashed #ccc;border-radius:10px;padding:12px}
+.slot-album-list{display:flex;flex-direction:column;gap:6px}
+.slot-album-item{display:flex;align-items:center;gap:8px;padding:6px 8px;background:#fff;border-radius:8px;font-size:11px;color:var(--text);border:1px solid #e8e4dc}
+.slot-album-item .sa-icons{font-size:16px;flex-shrink:0}
+.slot-album-item .sa-text{flex:1;line-height:1.4}
+.slot-album-item .sa-tag{font-size:9px;padding:1px 6px;border-radius:8px;background:#eef6ff;color:var(--wt);flex-shrink:0}
 .sol-confirm{text-align:center;margin-top:12px}
 
 /* ===== MY DOCS ===== */
@@ -274,33 +286,49 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:-apple-system,"Ping
     </div>
   </div>
 
-  <!-- ===== PINBALL ===== -->
+  <!-- ===== PACHINKO 落珠机 ===== -->
   <div id="pin-scr" class="scr">
     <div class="win" style="max-width:400px">
-      <div class="win-t"><span>&#127921; 平行人生弹珠台</span><div class="dots"><div class="d" onclick="backToDesk()">&#10005;</div></div></div>
+      <div class="win-t"><span>&#127921; 平行人生落珠机</span><div class="dots"><div class="d" onclick="backToDesk()">&#10005;</div></div></div>
       <div class="win-b" id="pin-body">
-        <div class="pb-info"><h3>发射弹珠，撞击情绪能量</h3><p>看看你当下最强烈的人生需求</p></div>
-        <div class="pb-score"><span>得分: <span id="pb-score">0</span></span><span>连击: <span id="pb-combo">0</span></span></div>
-        <div class="pb-wrap"><canvas id="pinball-canvas" width="340" height="440"></canvas></div>
+        <div class="pb-info"><h3>释放弹珠，捕获情绪能量</h3><p>点击画面上方选择落点，共5颗弹珠</p></div>
+        <div class="pb-score"><span>能量: <span id="pb-score">0</span></span><span>弹珠: <span id="pb-balls">5</span>/5</span></div>
+        <div class="pb-wrap"><canvas id="pachinko-canvas" width="340" height="480"></canvas></div>
         <div class="pb-keywords" id="pb-kw"></div>
         <div class="pb-exit" id="pb-exit"></div>
-        <div class="pb-launch"><button class="wbtn wbtn-p" id="pb-launch-btn" onclick="launchBall()" style="width:100%;padding:12px">&#128640; 发射弹珠</button></div>
-        <div style="text-align:center;margin-top:8px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button class="wbtn" id="pb-retry" style="padding:10px 20px;display:none" onclick="retryPin()">&#128260; 再来一局</button><button class="wbtn" id="pb-done" style="padding:10px 20px;display:none" onclick="finishPin()">&#9654; 记录情绪，返回桌面</button></div>
+        <div class="pb-launch"><button class="wbtn wbtn-p" id="pb-launch-btn" onclick="launchPachinkoBall()" style="width:100%;padding:12px">&#127921; 释放弹珠</button></div>
+        <div style="text-align:center;margin-top:8px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button class="wbtn" id="pb-retry" style="padding:10px 20px;display:none" onclick="retryPachinko()">&#128260; 再来一局</button><button class="wbtn" id="pb-done" style="padding:10px 20px;display:none" onclick="finishPin()">&#9654; 记录能量，返回桌面</button></div>
       </div>
     </div>
   </div>
 
-  <!-- ===== SOLITAIRE ===== -->
+  <!-- ===== SLOT MACHINE 三牌老虎机 ===== -->
   <div id="sol-scr" class="scr">
     <div class="win" style="max-width:400px">
-      <div class="win-t"><span>&#127183; 人生纸牌</span><div class="dots"><div class="d" onclick="backToDesk()">&#10005;</div></div></div>
+      <div class="win-t"><span>&#127183; 平行人生三牌老虎机</span><div class="dots"><div class="d" onclick="backToDesk()">&#10005;</div></div></div>
       <div class="win-b" id="sol-body">
-        <div class="sol-info"><h3>组合你的人生场景</h3><p>选择6张卡牌，拼出另一段人生</p></div>
-        <div class="sol-step" id="sol-step"></div>
-        <div class="sol-cat-title" id="sol-cat-title"></div>
-        <div class="sol-cards" id="sol-cards"></div>
-        <div class="sol-template" id="sol-tpl"><div class="tpl-title">人生组合</div><div class="tpl-slots" id="sol-slots"></div></div>
-        <div class="sol-confirm" id="sol-confirm" style="display:none"><button class="wbtn wbtn-p" style="width:100%;padding:10px" onclick="finishSol()">&#9654; 确认人生场景，返回桌面</button></div>
+        <div class="sol-info"><h3>拉动摇杆，抽取人生碎片</h3><p>三张相同触发稀有Jackpot！</p></div>
+        <div class="slot-frame">
+          <div class="slot-reels" id="slot-reels">
+            <div class="slot-reel" id="slot-reel-0"><div class="slot-reel-strip" id="slot-strip-0"></div></div>
+            <div class="slot-reel" id="slot-reel-1"><div class="slot-reel-strip" id="slot-strip-1"></div></div>
+            <div class="slot-reel" id="slot-reel-2"><div class="slot-reel-strip" id="slot-strip-2"></div></div>
+          </div>
+        </div>
+        <div class="sol-confirm" id="sol-spin-wrap"><button class="wbtn wbtn-p" id="sol-spin-btn" style="width:100%;padding:14px;font-size:16px" onclick="spinSlot()">&#127920; 拉动摇杆</button></div>
+        <div class="slot-result" id="sol-result" style="display:none">
+          <div class="slot-combo" id="sol-combo"></div>
+          <div class="slot-preview" id="sol-preview"></div>
+          <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;justify-content:center">
+            <button class="wbtn" onclick="favSlot()" style="padding:8px 16px">&#11088; 收藏</button>
+            <button class="wbtn" onclick="spinSlot()" style="padding:8px 16px">&#128260; 再抽一次</button>
+            <button class="wbtn wbtn-p" onclick="selectSlotLife()" style="padding:8px 16px">&#9654; 选择这段人生</button>
+          </div>
+        </div>
+        <div class="slot-album" id="sol-album" style="display:none">
+          <div style="font-size:11px;color:var(--textL);margin-bottom:6px;letter-spacing:1px">&#128214; 人生相册</div>
+          <div class="slot-album-list" id="sol-album-list"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -323,8 +351,8 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:-apple-system,"Ping
       <div class="gen-head"><div class="led"></div><span>PARALLEL_LIFE_RECOVERY v3.1</span></div>
       <div class="gen-body">
         <div class="gen-line" id="gl0"><span class="cur"></span> 正在读取扫雷碎片...</div>
-        <div class="gen-line" id="gl1"><span class="cur"></span> 正在分析情绪能量...</div>
-        <div class="gen-line" id="gl2"><span class="cur"></span> 正在组合人生纸牌...</div>
+        <div class="gen-line" id="gl1"><span class="cur"></span> 正在分析落珠能量...</div>
+        <div class="gen-line" id="gl2"><span class="cur"></span> 正在组合人生卡牌...</div>
         <div class="gen-line" id="gl3"><span class="cur"></span> 正在恢复人物轮廓...</div>
         <div class="gen-line" id="gl4"><span class="cur"></span> 正在匹配影像风格...</div>
         <div class="gen-line" id="gl5"><span class="cur"></span> 检测到人物照片缺失...</div>
@@ -372,8 +400,8 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:-apple-system,"Ping
 const G = {
   unlocked: { mine: false, pin: false, sol: false, file: false },
   mine: { items: [], danger: null, dir: '' },
-  pin: { scores: {}, topEmotion: '', exit: '', total: 0 },
-  sol: { picks: {}, scene: '' },
+  pin: { energy: {}, topEmotion: '', slot: '', total: 0, ballCount: 0 },
+  sol: { currentCards: [], favorites: [], selectedLife: null, album: [] },
   result: null
 };
 
@@ -404,66 +432,52 @@ const MINE_DANGER = [
 ];
 const DIR_MAP = { youth:'真实补拍', travel:'另一条人生', future:'未来生活', fantasy:'幻想身份', pet:'人宠世界' };
 
-const PIN_BUMPERS = [
-  { id:'free', label:'自由', emoji:'🕊️' },
-  { id:'together', label:'陪伴', emoji:'🤝' },
-  { id:'adventure', label:'冒险', emoji:'🏔️' },
-  { id:'chill', label:'松弛', emoji:'🌊' },
-  { id:'seen', label:'被看见', emoji:'👁️' },
-  { id:'restart', label:'重新开始', emoji:'🔄' },
-  { id:'romance', label:'浪漫', emoji:'🌹' },
-  { id:'curious', label:'好奇', emoji:'🔍' }
-];
-const PIN_OBSTACLES = [
-  { id:'ot', label:'加班', emoji:'💼' },
-  { id:'drain', label:'内耗', emoji:'🌀' },
-  { id:'urgent', label:'临时需求', emoji:'🚨' },
-  { id:'spam', label:'消息轰炸', emoji:'📱' }
-];
-const PIN_EXITS = [
-  { id:'real', label:'真实补拍', emoji:'📸' },
-  { id:'other', label:'另一条人生', emoji:'🌍' },
-  { id:'fantasy', label:'幻想身份', emoji:'✨' },
-  { id:'future', label:'未来生活', emoji:'🚀' }
+// Slot machine card pool - 24 cards across 6 categories
+const SLOT_CARDS = [
+  {id:'r1',icon:'👫',text:'旧朋友',cat:'rel'},
+  {id:'r2',icon:'💑',text:'命中注定的人',cat:'rel'},
+  {id:'r3',icon:'👨‍👩‍👧',text:'家人',cat:'rel'},
+  {id:'r4',icon:'🧑‍🤝‍🧑',text:'新伙伴',cat:'rel'},
+  {id:'t1',icon:'☀️',text:'夏天的下午',cat:'time'},
+  {id:'t2',icon:'🌅',text:'毕业那天',cat:'time'},
+  {id:'t3',icon:'🌙',text:'未来的某天',cat:'time'},
+  {id:'t4',icon:'⏰',text:'十八岁',cat:'time'},
+  {id:'p1',icon:'🏖️',text:'海边',cat:'place'},
+  {id:'p2',icon:'🏙️',text:'陌生城市',cat:'place'},
+  {id:'p3',icon:'🏡',text:'小时候的家',cat:'place'},
+  {id:'p4',icon:'🏯',text:'东方古城',cat:'place'},
+  {id:'i1',icon:'📷',text:'自由摄影师',cat:'id'},
+  {id:'i2',icon:'🎬',text:'电影导演',cat:'id'},
+  {id:'i3',icon:'🌍',text:'环球旅行者',cat:'id'},
+  {id:'i4',icon:'🤖',text:'未来探索者',cat:'id'},
+  {id:'e1',icon:'🔄',text:'重新开始',cat:'emo'},
+  {id:'e2',icon:'🕊️',text:'自由',cat:'emo'},
+  {id:'e3',icon:'🌹',text:'浪漫',cat:'emo'},
+  {id:'e4',icon:'👁️',text:'被看见',cat:'emo'},
+  {id:'f1',icon:'💎',text:'未来芯片',cat:'fan'},
+  {id:'f2',icon:'🐾',text:'宠物伙伴',cat:'fan'},
+  {id:'f3',icon:'🔮',text:'魔法世界',cat:'fan'},
+  {id:'f4',icon:'🌌',text:'平行宇宙',cat:'fan'}
 ];
 
-const SOL_CATEGORIES = [
-  { key:'who', title:'人物', cards:[
-    {id:'who1',icon:'🎒',text:'十八岁的我',tags:['youth']},
-    {id:'who2',icon:'🧑‍💼',text:'未来的我',tags:['future']},
-    {id:'who3',icon:'🧒',text:'小时候的我',tags:['youth']},
-    {id:'who4',icon:'🦸',text:'想象中的自己',tags:['fantasy']}
-  ]},
-  { key:'when', title:'时间', cards:[
-    {id:'when1',icon:'☀️',text:'夏天的某个下午',tags:['youth','travel']},
-    {id:'when2',icon:'🌅',text:'毕业那天',tags:['youth']},
-    {id:'when3',icon:'🌙',text:'未来的某一天',tags:['future']},
-    {id:'when4',icon:'⏰',text:'如果能回到过去',tags:['youth','travel']}
-  ]},
-  { key:'where', title:'地点', cards:[
-    {id:'where1',icon:'🛤️',text:'放学路上',tags:['youth']},
-    {id:'where2',icon:'🏙️',text:'陌生城市',tags:['future','travel']},
-    {id:'where3',icon:'🏡',text:'小时候的家',tags:['youth']},
-    {id:'where4',icon:'🌌',text:'某个平行世界',tags:['fantasy','future']}
-  ]},
-  { key:'rel', title:'关系', cards:[
-    {id:'rel1',icon:'👫',text:'旧朋友',tags:['youth']},
-    {id:'rel2',icon:'💑',text:'命中注定的人',tags:['fantasy']},
-    {id:'rel3',icon:'👨‍👩‍👧',text:'家人',tags:['youth']},
-    {id:'rel4',icon:'🧑‍🤝‍🧑',text:'全新的伙伴',tags:['future','travel']}
-  ]},
-  { key:'role', title:'身份', cards:[
-    {id:'role1',icon:'📷',text:'自由摄影师',tags:['travel']},
-    {id:'role2',icon:'🏠',text:'安静生活的人',tags:['youth']},
-    {id:'role3',icon:'🌍',text:'环球旅行者',tags:['travel','future']},
-    {id:'role4',icon:'🤖',text:'未来世界的探索者',tags:['future','fantasy']}
-  ]},
-  { key:'style', title:'风格', cards:[
-    {id:'style1',icon:'📷',text:'胶片照片',tags:['youth']},
-    {id:'style2',icon:'🤖',text:'赛博朋克',tags:['future']},
-    {id:'style3',icon:'🏯',text:'古风写意',tags:['fantasy']},
-    {id:'style4',icon:'☀️',text:'温暖日常',tags:['youth','travel']}
-  ]}
+// Pachinko keywords (bumpers on the board)
+const PACHINKO_KEYWORDS = [
+  {id:'free',label:'自由',emoji:'🕊️',color:'#4a9fe5'},
+  {id:'together',label:'陪伴',emoji:'🤝',color:'#e57c4a'},
+  {id:'adventure',label:'冒险',emoji:'🏔️',color:'#4ae57c'},
+  {id:'chill',label:'松弛',emoji:'🌊',color:'#7c4ae5'},
+  {id:'seen',label:'被看见',emoji:'👁️',color:'#e5c74a'},
+  {id:'restart',label:'重新开始',emoji:'🔄',color:'#e54a7c'},
+  {id:'romance',label:'浪漫',emoji:'🌹',color:'#ff6b9d'},
+  {id:'curious',label:'好奇',emoji:'🔍',color:'#4ae5c7'}
+];
+
+// Pachinko exit slots at the bottom
+const PACHINKO_SLOTS = [
+  {id:'real',label:'真实补拍',emoji:'📸'},
+  {id:'other',label:'另一条人生',emoji:'🌍'},
+  {id:'fantasy',label:'幻想身份',emoji:'✨'},
+  {id:'future',label:'未来生活',emoji:'🚀'}
 ];
 
 // ===== SCREEN NAV =====
@@ -534,8 +548,8 @@ function renderDesktop(){
   const allPlayed = G.unlocked.mine && G.unlocked.pin && G.unlocked.sol;
   const icons = [
     { id:'mine', icon:'💣', label:'人生扫雷', locked:false, played:G.unlocked.mine },
-    { id:'pin', icon:'🎱', label:'弹珠台', locked:false, played:G.unlocked.pin },
-    { id:'sol', icon:'🃏', label:'人生纸牌', locked:false, played:G.unlocked.sol },
+    { id:'pin', icon:'🎱', label:'落珠机', locked:false, played:G.unlocked.pin },
+    { id:'sol', icon:'🎰', label:'三牌老虎机', locked:false, played:G.unlocked.sol },
     { id:'docs', icon:'📁', label:'我的文档', locked:false, played:false },
     { id:'trash', icon:'🗑️', label:'回收站', locked:false, played:false },
     { id:'file', icon:'🖼️', label:'另一个我\n.jpg', locked:!allPlayed, played:false }
@@ -657,414 +671,581 @@ function saveMineResult(){
 
 function finishMine(){ backToDesk(); toast('已找到一段遗失的人生素材'); }
 
-// ===== PINBALL =====
-let _pinRAF = null;
+// Canvas helper
+function rr(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.lineTo(x+w-r,y);c.quadraticCurveTo(x+w,y,x+w,y+r);c.lineTo(x+w,y+h-r);c.quadraticCurveTo(x+w,y+h,x+w-r,y+h);c.lineTo(x+r,y+h);c.quadraticCurveTo(x,y+h,x,y+h-r);c.lineTo(x,y+r);c.quadraticCurveTo(x,y,x+r,y);c.closePath();}
+
+// Pachinko canvas click handler for aim position
+document.addEventListener('click', function(e){
+  const canvas = document.getElementById('pachinko-canvas');
+  if(!canvas || !window._pk) return;
+  if(e.target === canvas){
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const x = (e.clientX - rect.left) * scaleX;
+    window._pk.aimX = Math.max(15, Math.min(canvas.width-15, x));
+    if(window._pk.dropReady && !window._pk.ball) drawPachinko();
+  }
+});
+
+// ===== PACHINKO 落珠机 =====
+let _pachRAF = null;
+const PK_ROWS = 10, PK_COLS = 7, PK_PEG_R = 5, PK_BALL_R = 7;
+
 function initPin(){
-  // Cancel any running animation
-  if(_pinRAF){ cancelAnimationFrame(_pinRAF); _pinRAF = null; }
-  // Reset UI
+  if(_pachRAF){ cancelAnimationFrame(_pachRAF); _pachRAF = null; }
   document.getElementById('pb-done').style.display='none';
   document.getElementById('pb-retry').style.display='none';
   document.getElementById('pb-score').textContent='0';
-  document.getElementById('pb-combo').textContent='0';
+  document.getElementById('pb-balls').textContent='5';
   document.getElementById('pb-kw').innerHTML='';
   document.getElementById('pb-exit').classList.remove('show');
   document.getElementById('pb-launch-btn').style.display='block';
+  document.getElementById('pb-launch-btn').innerHTML='&#127921; 释放弹珠';
 
-  const canvas = document.getElementById('pinball-canvas');
+  const canvas = document.getElementById('pachinko-canvas');
   if(!canvas) return;
   const ctx = canvas.getContext('2d');
   if(!ctx) return;
   const W = canvas.width, H = canvas.height;
 
-  // Layout bumpers in a staggered pattern for more interesting bounces
-  const bumpers = PIN_BUMPERS.map((b,i)=>({
-    ...b,
-    x: 55 + (i%3)*110 + (Math.floor(i/3)%2)*55,
-    y: 60 + Math.floor(i/3)*75,
-    r: 26, hits:0, flash:0, scale:1
-  }));
-  // Obstacles between bumpers
-  const obstacles = PIN_OBSTACLES.map((o,i)=>({
-    ...o,
-    x: 70 + i*70, y: 290 + (i%2)*40,
-    w:55, h:16, hits:0, flash:0
-  }));
-  // Exit gates at bottom
-  const gateW = Math.floor((W-20)/4);
-  const exits = PIN_EXITS.map((e,i)=>({
-    ...e, x: 10 + i*gateW, y: H-35, w: gateW-6, h: 28
+  // Build peg grid
+  const pegs = [];
+  const startY = 55, endY = H - 70;
+  const rowH = (endY - startY) / (PK_ROWS - 1);
+  const colW = (W - 40) / (PK_COLS - 1);
+  for(let r=0; r<PK_ROWS; r++){
+    const offset = (r%2===0) ? 0 : colW/2;
+    const cols = (r%2===0) ? PK_COLS : PK_COLS-1;
+    for(let c=0; c<cols; c++){
+      pegs.push({ x: 20 + c*colW + offset, y: startY + r*rowH, r: PK_PEG_R, flash:0 });
+    }
+  }
+
+  // Place keyword bumpers between peg rows (8 bumpers)
+  const bumpers = PACHINKO_KEYWORDS.map((kw,i)=>{
+    const row = 2 + Math.floor(i/2)*2;
+    const col = (i%2===0) ? 2 : 4;
+    return {
+      ...kw,
+      x: 20 + col*colW, y: startY + row*rowH + rowH/2,
+      r: 18, hits:0, flash:0, scale:1
+    };
+  });
+
+  // Bottom slots
+  const slotW = (W-20)/4;
+  const slots = PACHINKO_SLOTS.map((s,i)=>({
+    ...s, x:10+i*slotW, y:H-38, w:slotW-4, h:30
   }));
 
-  window._pin = { ctx, W, H, bumpers, obstacles, exits, ball:null, particles:[],
-    scores:{}, combo:0, total:0, running:false, landed:false, frame:0 };
-  drawPinTable();
+  // Slot dividers (walls between slots)
+  const dividers = [];
+  for(let i=1; i<4; i++){
+    dividers.push({ x: 10+i*slotW-2, y: H-55, w:4, h:47 });
+  }
+
+  window._pk = { ctx, W, H, pegs, bumpers, slots, dividers,
+    ball:null, balls:[], trail:[], particles:[],
+    energy:{}, total:0, ballsLeft:5, ballsDropped:0,
+    running:false, aimX:W/2, dropReady:true };
+  drawPachinko();
 }
 
-function rr(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.lineTo(x+w-r,y);c.quadraticCurveTo(x+w,y,x+w,y+r);c.lineTo(x+w,y+h-r);c.quadraticCurveTo(x+w,y+h,x+w-r,y+h);c.lineTo(x+r,y+h);c.quadraticCurveTo(x,y+h,x,y+h-r);c.lineTo(x,y+r);c.quadraticCurveTo(x,y,x+r,y);c.closePath();}
-
-function drawPinTable(){
-  const p = window._pin;
-  if(!p || !p.ctx) return;
+function drawPachinko(){
+  const p = window._pk;
+  if(!p||!p.ctx) return;
   const {ctx,W,H} = p;
   ctx.clearRect(0,0,W,H);
 
-  // Dark gradient background
-  const bg = ctx.createLinearGradient(0,0,0,H);
-  bg.addColorStop(0,'#141428');bg.addColorStop(1,'#0a0a1e');
+  // Dark background with subtle gradient
+  const bg=ctx.createLinearGradient(0,0,0,H);
+  bg.addColorStop(0,'#0a0a1e');bg.addColorStop(1,'#0e1428');
   ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
 
-  // Subtle grid
-  ctx.strokeStyle='rgba(80,80,180,.06)';ctx.lineWidth=1;
-  for(let x=0;x<W;x+=35){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
-  for(let y=0;y<H;y+=35){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+  // Drop zone indicator at top
+  ctx.fillStyle='rgba(100,150,255,.08)';
+  ctx.fillRect(0,0,W,40);
+  ctx.strokeStyle='rgba(100,150,255,.2)';ctx.lineWidth=1;
+  ctx.setLineDash([4,4]);
+  ctx.beginPath();ctx.moveTo(0,40);ctx.lineTo(W,40);ctx.stroke();
+  ctx.setLineDash([]);
 
-  // Border walls (glowing)
-  ctx.strokeStyle='#3355aa';ctx.lineWidth=3;ctx.strokeRect(3,3,W-6,H-6);
-  ctx.strokeStyle='rgba(60,100,200,.2)';ctx.lineWidth=6;ctx.strokeRect(1,1,W-2,H-2);
+  // Aim indicator
+  if(p.dropReady && p.ballsLeft>0){
+    ctx.beginPath();ctx.arc(p.aimX,15,6,0,Math.PI*2);
+    ctx.fillStyle='rgba(255,200,0,.6)';ctx.fill();
+    ctx.strokeStyle='rgba(255,200,0,.3)';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(p.aimX,22);ctx.lineTo(p.aimX,38);ctx.stroke();
+  }
 
-  // Bumpers (with glow and scale animation)
+  // Pegs
+  p.pegs.forEach(pg=>{
+    ctx.beginPath();ctx.arc(pg.x,pg.y,pg.r,0,Math.PI*2);
+    const glow = pg.flash>0;
+    ctx.fillStyle=glow?'#88aadd':'#334466';
+    ctx.fill();
+    if(glow){ ctx.strokeStyle='#aaccee';ctx.lineWidth=1;ctx.stroke();pg.flash--; }
+  });
+
+  // Keyword bumpers
   p.bumpers.forEach(b=>{
-    const glow = b.flash > 0;
-    const sc = b.scale || 1;
-    const r = b.r * sc;
+    const sc = b.scale||1;
+    const r = b.r*sc;
+    const glow = b.flash>0;
     // Outer glow
     if(glow){
-      ctx.beginPath();ctx.arc(b.x,b.y,r+8,0,Math.PI*2);
-      ctx.fillStyle='rgba(255,220,60,.15)';ctx.fill();
+      ctx.beginPath();ctx.arc(b.x,b.y,r+6,0,Math.PI*2);
+      ctx.fillStyle=b.color+'33';ctx.fill();
     }
-    // Main circle
+    // Main
     ctx.beginPath();ctx.arc(b.x,b.y,r,0,Math.PI*2);
-    const grad = ctx.createRadialGradient(b.x-4,b.y-4,2,b.x,b.y,r);
-    if(glow){ grad.addColorStop(0,'#ffee66');grad.addColorStop(1,'#cc8800'); }
-    else { grad.addColorStop(0,'#4477cc');grad.addColorStop(1,'#223366'); }
-    ctx.fillStyle=grad;ctx.fill();
-    ctx.strokeStyle=glow?'#ffee88':'#5588bb';ctx.lineWidth=2;ctx.stroke();
+    ctx.fillStyle=glow?b.color:b.color+'88';ctx.fill();
+    ctx.strokeStyle=glow?'#fff':b.color;ctx.lineWidth=1.5;ctx.stroke();
     // Emoji
-    ctx.fillStyle='#fff';ctx.font='16px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillText(b.emoji,b.x,b.y);
-    // Label below
-    ctx.font='8px sans-serif';ctx.fillStyle='rgba(255,255,255,.6)';
-    ctx.fillText(b.label,b.x,b.y+r+10);
-    // Animate flash/scale
-    if(b.flash>0) b.flash--;
-    if(sc>1) b.scale = Math.max(1, sc - 0.05);
-  });
-
-  // Obstacles
-  p.obstacles.forEach(o=>{
-    const glow = o.flash > 0;
-    ctx.fillStyle=glow?'#cc3333':'#3a2222';
-    ctx.strokeStyle=glow?'#ff6666':'#664444';ctx.lineWidth=2;
-    rr(ctx,o.x-o.w/2,o.y-o.h/2,o.w,o.h,5);ctx.fill();ctx.stroke();
     ctx.fillStyle='#fff';ctx.font='12px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillText(o.emoji,o.x,o.y);
-    if(o.flash>0) o.flash--;
+    ctx.fillText(b.emoji,b.x,b.y-1);
+    // Label
+    ctx.font='7px sans-serif';ctx.fillStyle='rgba(255,255,255,.5)';
+    ctx.fillText(b.label,b.x,b.y+r+8);
+    if(b.flash>0) b.flash--;
+    if(sc>1) b.scale=Math.max(1,sc-0.04);
   });
 
-  // Exit gates
-  p.exits.forEach(e=>{
-    ctx.fillStyle='#1a2244';ctx.strokeStyle='#3355aa';ctx.lineWidth=2;
-    rr(ctx,e.x,e.y,e.w,e.h,4);ctx.fill();ctx.stroke();
-    ctx.fillStyle='#88aadd';ctx.font='9px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillText(e.emoji+e.label,e.x+e.w/2,e.y+e.h/2);
+  // Slot dividers
+  p.dividers.forEach(d=>{
+    ctx.fillStyle='#2a3a5a';
+    ctx.fillRect(d.x,d.y,d.w,d.h);
+  });
+
+  // Bottom slots
+  p.slots.forEach(s=>{
+    ctx.fillStyle='#141e33';
+    ctx.strokeStyle='#2a4a6a';ctx.lineWidth=1.5;
+    rr(ctx,s.x,s.y,s.w,s.h,4);ctx.fill();ctx.stroke();
+    ctx.fillStyle='#6688aa';ctx.font='8px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(s.emoji,s.x+s.w/2,s.y+s.h/2-6);
+    ctx.fillText(s.label,s.x+s.w/2,s.y+s.h/2+6);
   });
 
   // Particles
   p.particles.forEach(pt=>{
-    ctx.globalAlpha=pt.life;
-    ctx.fillStyle=pt.color;
+    ctx.globalAlpha=pt.life;ctx.fillStyle=pt.color;
     ctx.beginPath();ctx.arc(pt.x,pt.y,pt.r,0,Math.PI*2);ctx.fill();
     ctx.globalAlpha=1;
   });
 
-  // Ball (with trail)
+  // Ball trail
+  p.trail.forEach((t,i)=>{
+    ctx.globalAlpha=t.life;
+    ctx.beginPath();ctx.arc(t.x,t.y,PK_BALL_R*(0.5+i*0.1),0,Math.PI*2);
+    ctx.fillStyle='rgba(255,200,0,.3)';ctx.fill();
+    ctx.globalAlpha=1;
+  });
+
+  // Ball
   if(p.ball){
     const b=p.ball;
-    // Trail
-    for(let i=1;i<=3;i++){
-      const tx=b.x-b.vx*i*0.4, ty=b.y-b.vy*i*0.4;
-      ctx.beginPath();ctx.arc(tx,ty,b.r*(1-i*0.2),0,Math.PI*2);
-      ctx.fillStyle=`rgba(255,200,0,${0.15-i*0.04})`;ctx.fill();
-    }
-    // Main ball
-    const bg2=ctx.createRadialGradient(b.x-3,b.y-3,1,b.x,b.y,b.r);
-    bg2.addColorStop(0,'#ffee44');bg2.addColorStop(1,'#cc8800');
-    ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,Math.PI*2);
-    ctx.fillStyle=bg2;ctx.fill();
-    ctx.strokeStyle='#ffee88';ctx.lineWidth=1.5;ctx.stroke();
+    const grad=ctx.createRadialGradient(b.x-2,b.y-2,1,b.x,b.y,PK_BALL_R);
+    grad.addColorStop(0,'#ffee44');grad.addColorStop(1,'#cc8800');
+    ctx.beginPath();ctx.arc(b.x,b.y,PK_BALL_R,0,Math.PI*2);
+    ctx.fillStyle=grad;ctx.fill();
+    ctx.strokeStyle='#ffee88';ctx.lineWidth=1;ctx.stroke();
     // Shine
-    ctx.beginPath();ctx.arc(b.x-3,b.y-3,b.r*0.35,0,Math.PI*2);
-    ctx.fillStyle='rgba(255,255,255,.4)';ctx.fill();
+    ctx.beginPath();ctx.arc(b.x-2,b.y-2,PK_BALL_R*0.3,0,Math.PI*2);
+    ctx.fillStyle='rgba(255,255,255,.5)';ctx.fill();
   }
 
-  // "Ready" text when no ball
-  if(!p.ball && !p.landed){
-    ctx.fillStyle='rgba(255,255,255,.15)';ctx.font='14px sans-serif';ctx.textAlign='center';
-    ctx.fillText('点击下方按钮发射弹珠',W/2,H-60);
+  // Remaining balls indicator
+  if(p.ballsLeft>0 && !p.ball){
+    ctx.fillStyle='rgba(255,255,255,.12)';ctx.font='12px sans-serif';ctx.textAlign='center';
+    ctx.fillText('点击画面上方释放弹珠',W/2,H-55);
   }
 }
 
-function launchBall(){
-  const p = window._pin;
-  if(!p || p.running) return;
-  // Cancel any stale animation frame
-  if(_pinRAF){ cancelAnimationFrame(_pinRAF); _pinRAF = null; }
-  document.getElementById('pb-launch-btn').style.display='none';
-  // Launch ball upward with random angle
-  const angle = -Math.PI/2 + (Math.random()-0.5)*0.6; // mostly upward
-  const speed = 11 + Math.random()*3;
-  p.ball = { x:p.W/2, y:p.H-55, vx:Math.cos(angle)*speed, vy:Math.sin(angle)*speed, r:9 };
+function launchPachinkoBall(){
+  const p = window._pk;
+  if(!p || p.ball || p.ballsLeft<=0) return;
+  p.ball = { x:p.aimX, y:18, vx:(Math.random()-0.5)*1.5, vy:1, r:PK_BALL_R };
   p.running = true;
-  p.landed = false;
-  p.combo = 0;
-  p.frame = 0;
-  _pinRAF = requestAnimationFrame(pinLoop);
+  p.dropReady = false;
+  p.trail = [];
+  document.getElementById('pb-launch-btn').style.display='none';
+  _pachRAF = requestAnimationFrame(pachinkoLoop);
 }
 
-function pinLoop(){
-  const p = window._pin;
-  if(!p || !p.running || !p.ball){ return; }
-  try {
+function pachinkoLoop(){
+  const p = window._pk;
+  if(!p||!p.running||!p.ball) return;
+  try{
     const b = p.ball;
-    p.frame++;
-
-    // Physics: gravity + mild air drag
-    b.vy += 0.22;
-    b.vx *= 0.999;
-    b.vy *= 0.999;
+    // Physics
+    b.vy += 0.15;
+    b.vx *= 0.998;
     b.x += b.vx;
     b.y += b.vy;
 
-    // Wall bounces (elastic)
-    if(b.x-b.r < 5){ b.x=b.r+5; b.vx=Math.abs(b.vx)*0.85; }
-    if(b.x+b.r > p.W-5){ b.x=p.W-b.r-5; b.vx=-Math.abs(b.vx)*0.85; }
-    if(b.y-b.r < 5){ b.y=b.r+5; b.vy=Math.abs(b.vy)*0.85; }
+    // Trail
+    p.trail.push({x:b.x,y:b.y,life:0.6});
+    if(p.trail.length>8) p.trail.shift();
+    p.trail.forEach(t=>t.life-=0.06);
+    p.trail = p.trail.filter(t=>t.life>0);
 
-    // Bumper collisions (satisfying bounce)
+    // Wall bounce
+    if(b.x-b.r<4){b.x=b.r+4;b.vx=Math.abs(b.vx)*0.7;}
+    if(b.x+b.r>p.W-4){b.x=p.W-b.r-4;b.vx=-Math.abs(b.vx)*0.7;}
+    if(b.y-b.r<4){b.y=b.r+4;b.vy=Math.abs(b.vy)*0.5;}
+
+    // Peg collisions
+    p.pegs.forEach(pg=>{
+      const dx=b.x-pg.x, dy=b.y-pg.y;
+      const dist=Math.sqrt(dx*dx+dy*dy);
+      const minD=b.r+pg.r;
+      if(dist<minD && dist>0.1){
+        const nx=dx/dist, ny=dy/dist;
+        const dot=b.vx*nx+b.vy*ny;
+        b.vx-=2*dot*nx*0.7;
+        b.vy-=2*dot*ny*0.7;
+        b.x+=nx*(minD-dist+0.5);
+        b.y+=ny*(minD-dist+0.5);
+        pg.flash=4;
+      }
+    });
+
+    // Keyword bumper collisions (bouncy + score)
     p.bumpers.forEach(bmp=>{
       const dx=b.x-bmp.x, dy=b.y-bmp.y;
       const dist=Math.sqrt(dx*dx+dy*dy);
-      const minDist = b.r + bmp.r;
-      if(dist < minDist && dist > 0.1){
+      const minD=b.r+bmp.r;
+      if(dist<minD && dist>0.1){
         const nx=dx/dist, ny=dy/dist;
-        // Reflect velocity
-        const dot = b.vx*nx + b.vy*ny;
-        b.vx -= 2*dot*nx;
-        b.vy -= 2*dot*ny;
-        // Add bounce force (makes it feel alive!)
-        const boost = 1.15 + Math.random()*0.1;
-        b.vx *= boost; b.vy *= boost;
-        // Push ball out of bumper
-        const overlap = minDist - dist + 1;
-        b.x += nx*overlap; b.y += ny*overlap;
-        // Score + effects
-        bmp.hits++; bmp.flash=12; bmp.scale=1.2;
-        p.scores[bmp.id]=(p.scores[bmp.id]||0)+10;
-        p.combo++; p.total+=10;
+        const dot=b.vx*nx+b.vy*ny;
+        b.vx-=2*dot*nx;
+        b.vy-=2*dot*ny;
+        // Boost bounce
+        b.vx*=1.1;b.vy*=1.1;
+        b.x+=nx*(minD-dist+1);
+        b.y+=ny*(minD-dist+1);
+        // Score
+        bmp.hits++;bmp.flash=10;bmp.scale=1.25;
+        p.energy[bmp.id]=(p.energy[bmp.id]||0)+10;
+        p.total+=10;
         document.getElementById('pb-score').textContent=p.total;
-        document.getElementById('pb-combo').textContent=p.combo;
-        updatePinKeywords();
-        // Spawn particles
-        for(let i=0;i<6;i++){
-          p.particles.push({x:bmp.x+nx*bmp.r, y:bmp.y+ny*bmp.r,
-            vx:(Math.random()-0.5)*4+nx*2, vy:(Math.random()-0.5)*4+ny*2,
-            r:2+Math.random()*2, life:1, color:'#ffdd44'});
+        updatePachinkoKeywords();
+        // Particles
+        for(let i=0;i<4;i++){
+          p.particles.push({x:bmp.x+nx*bmp.r,y:bmp.y+ny*bmp.r,
+            vx:(Math.random()-0.5)*3+nx*2,vy:(Math.random()-0.5)*3+ny*2,
+            r:1.5+Math.random()*1.5,life:1,color:bmp.color});
         }
       }
     });
 
-    // Obstacle collisions (absorbs energy)
-    p.obstacles.forEach(obs=>{
-      const hw=obs.w/2, hh=obs.h/2;
-      const cx=Math.max(obs.x-hw,Math.min(b.x,obs.x+hw));
-      const cy=Math.max(obs.y-hh,Math.min(b.y,obs.y+hh));
-      const dx=b.x-cx, dy=b.y-cy;
+    // Slot divider collisions
+    p.dividers.forEach(d=>{
+      const hw=d.w/2,hh=d.h/2;
+      const cx=Math.max(d.x,Math.min(b.x,d.x+d.w));
+      const cy=Math.max(d.y,Math.min(b.y,d.y+d.h));
+      const dx=b.x-cx,dy=b.y-cy;
       const dist=Math.sqrt(dx*dx+dy*dy);
-      if(dist < b.r && dist > 0.1){
-        const nx=dx/dist, ny=dy/dist;
+      if(dist<b.r && dist>0.1){
+        const nx=dx/dist,ny=dy/dist;
         const dot=b.vx*nx+b.vy*ny;
-        b.vx -= 2*dot*nx; b.vy -= 2*dot*ny;
-        b.vx *= 0.65; b.vy *= 0.65;
-        b.x += nx*(b.r-dist+1); b.y += ny*(b.r-dist+1);
-        obs.hits++; obs.flash=8;
-        p.combo=0;
-        document.getElementById('pb-combo').textContent=p.combo;
+        b.vx-=2*dot*nx;b.vy-=2*dot*ny;
+        b.vx*=0.6;b.vy*=0.6;
+        b.x+=nx*(b.r-dist+0.5);b.y+=ny*(b.r-dist+0.5);
       }
     });
 
     // Update particles
-    p.particles = p.particles.filter(pt=>{
-      pt.x+=pt.vx; pt.y+=pt.vy; pt.vy+=0.1;
-      pt.life-=0.04; pt.r*=0.97;
-      return pt.life > 0;
+    p.particles=p.particles.filter(pt=>{
+      pt.x+=pt.vx;pt.y+=pt.vy;pt.vy+=0.08;pt.life-=0.04;pt.r*=0.97;
+      return pt.life>0;
     });
 
-    // Exit gate check (ball falls below table)
-    if(b.y - b.r > p.H - 5){
-      let hitExit = null;
-      p.exits.forEach(e=>{
-        if(b.x > e.x && b.x < e.x + e.w) hitExit = e;
+    // Ball falls into slot
+    if(b.y+b.r > p.H-8){
+      let hitSlot=null;
+      p.slots.forEach(s=>{
+        if(b.x>s.x && b.x<s.x+s.w) hitSlot=s;
       });
-      if(!hitExit) hitExit = p.exits[Math.floor(Math.random()*p.exits.length)];
-      p.running = false;
-      p.landed = true;
-      p.ball = null;
-      savePinResult(hitExit);
-      drawPinTable();
-      const exitEl = document.getElementById('pb-exit');
-      exitEl.innerHTML = `${hitExit.emoji} 弹珠落入：<strong>${hitExit.label}</strong>`;
-      exitEl.classList.add('show');
-      document.getElementById('pb-done').style.display='block';
-      document.getElementById('pb-retry').style.display='inline-block';
-      _pinRAF = null;
+      if(!hitSlot) hitSlot=p.slots[Math.floor(Math.random()*p.slots.length)];
+      // Record
+      p.balls.push({slot:hitSlot.id, energy:{...p.energy}});
+      p.ballsLeft--;
+      p.ballsDropped++;
+      p.ball=null;
+      p.running=false;
+      p.trail=[];
+      document.getElementById('pb-balls').textContent=5-p.ballsDropped;
+      // Flash the slot
+      drawPachinko();
+      // Highlight landed slot
+      const {ctx}=p;
+      ctx.fillStyle='rgba(255,200,0,.3)';
+      ctx.fillRect(hitSlot.x,hitSlot.y,hitSlot.w,hitSlot.h);
+
+      if(p.ballsLeft>0){
+        // More balls to drop
+        p.dropReady=true;
+        document.getElementById('pb-launch-btn').style.display='block';
+        document.getElementById('pb-launch-btn').innerHTML='&#127921; 释放弹珠 ('+p.ballsLeft+'颗)';
+      } else {
+        // All balls done
+        finishPachinkoRound();
+      }
+      _pachRAF=null;
       return;
     }
-
-    drawPinTable();
-  } catch(e){ console.error('Pinball loop error:', e); p.running = false; }
-  if(p.running) _pinRAF = requestAnimationFrame(pinLoop);
+    drawPachinko();
+  }catch(e){console.error('Pachinko error:',e);p.running=false;}
+  if(p.running) _pachRAF=requestAnimationFrame(pachinkoLoop);
 }
 
-function updatePinKeywords(){
-  const p = window._pin;
-  if(!p) return;
-  const sorted = Object.entries(p.scores).sort((a,b)=>b[1]-a[1]);
-  document.getElementById('pb-kw').innerHTML = sorted.map(([id])=>{
-    const bmp = PIN_BUMPERS.find(b=>b.id===id);
-    return bmp ? `<span>${bmp.emoji} ${bmp.label}</span>` : '';
+function updatePachinkoKeywords(){
+  const p=window._pk;if(!p)return;
+  const sorted=Object.entries(p.energy).sort((a,b)=>b[1]-a[1]);
+  document.getElementById('pb-kw').innerHTML=sorted.slice(0,6).map(([id,val])=>{
+    const kw=PACHINKO_KEYWORDS.find(k=>k.id===id);
+    return kw?`<span>${kw.emoji} ${kw.label} +${val}</span>`:'';
   }).join('');
 }
 
-function savePinResult(exit){
-  const p = window._pin;
-  const sorted = Object.entries(p.scores).sort((a,b)=>b[1]-a[1]);
-  G.pin.scores = {...p.scores};
-  G.pin.total = p.total;
-  G.pin.exit = exit.id;
-  G.pin.topEmotion = sorted.length ? sorted[0][0] : 'free';
-  G.unlocked.pin = true;
+function finishPachinkoRound(){
+  const p=window._pk;
+  // Find top emotion
+  const sorted=Object.entries(p.energy).sort((a,b)=>b[1]-a[1]);
+  const topId=sorted.length?sorted[0][0]:'free';
+  // Find most-landed slot
+  const slotCounts={};
+  p.balls.forEach(b=>{slotCounts[b.slot]=(slotCounts[b.slot]||0)+1;});
+  const topSlot=Object.entries(slotCounts).sort((a,b)=>b[1]-a[1])[0][0];
+  const slotInfo=PACHINKO_SLOTS.find(s=>s.id===topSlot);
+  const emoInfo=PACHINKO_KEYWORDS.find(k=>k.id===topId);
+
+  G.pin.energy={...p.energy};
+  G.pin.topEmotion=topId;
+  G.pin.slot=topSlot;
+  G.pin.total=p.total;
+  G.pin.ballCount=p.ballsDropped;
+  G.unlocked.pin=true;
+
+  const exitEl=document.getElementById('pb-exit');
+  exitEl.innerHTML=`${emoInfo?emoInfo.emoji:'🕊️'} 最强能量：<strong>${emoInfo?emoInfo.label:'自由'}</strong><br>${slotInfo?slotInfo.emoji:'📸'} 落入：<strong>${slotInfo?slotInfo.label:'真实补拍'}</strong>`;
+  exitEl.classList.add('show');
+  document.getElementById('pb-done').style.display='block';
+  document.getElementById('pb-retry').style.display='inline-block';
 }
 
-function retryPin(){
-  if(_pinRAF){ cancelAnimationFrame(_pinRAF); _pinRAF = null; }
-  const p = window._pin;
-  if(!p) return;
-  p.ball=null; p.running=false; p.landed=false; p.combo=0;
-  p.particles=[];
-  // Reset bumper states
-  p.bumpers.forEach(b=>{b.flash=0;b.scale=1;});
-  p.obstacles.forEach(o=>{o.flash=0;});
-  document.getElementById('pb-retry').style.display='none';
-  document.getElementById('pb-done').style.display='none';
-  document.getElementById('pb-exit').classList.remove('show');
-  document.getElementById('pb-launch-btn').style.display='block';
-  drawPinTable();
+function retryPachinko(){
+  if(_pachRAF){cancelAnimationFrame(_pachRAF);_pachRAF=null;}
+  initPin();
 }
 
-function finishPin(){ backToDesk(); toast('已捕获一段未发生的人生情绪'); }
+function finishPin(){ backToDesk(); toast('已捕获情绪能量与人生方向'); }
 
-// ===== SOLITAIRE =====
+// ===== SLOT MACHINE 三牌老虎机 =====
 function initSol(){
-  document.getElementById('sol-confirm').style.display = 'none';
-  window._sol = { step: 0, picks: {} };
-  renderSolStep();
+  document.getElementById('sol-result').style.display='none';
+  document.getElementById('sol-album').style.display='none';
+  document.getElementById('sol-spin-btn').style.display='block';
+  // Reset reels to show random cards
+  for(let i=0;i<3;i++) showReelCard(i, SLOT_CARDS[Math.floor(Math.random()*SLOT_CARDS.length)]);
+  window._slot = { spinning:false, results:[], album:[] };
+  G.sol.currentCards=[];
 }
 
-function renderSolStep(){
-  const s = window._sol;
-  const cat = SOL_CATEGORIES[s.step];
-
-  // Step dots
-  document.getElementById('sol-step').innerHTML = SOL_CATEGORIES.map((_,i)=>{
-    const cls = i < s.step ? 'dot done' : (i === s.step ? 'dot cur' : 'dot');
-    return `<div class="${cls}"></div>`;
-  }).join('');
-
-  document.getElementById('sol-cat-title').textContent = `选择${cat.title}`;
-
-  // Determine recommended cards based on mine dir + pin exit
-  const preferredTags = new Set();
-  if(G.mine.dir) preferredTags.add(G.mine.dir);
-  if(G.pin.exit) preferredTags.add(G.pin.exit === 'real' ? 'youth' : G.pin.exit === 'other' ? 'travel' : G.pin.exit === 'fantasy' ? 'fantasy' : 'future');
-
-  const cardsHtml = cat.cards.map(c => {
-    const isRec = c.tags.some(t => preferredTags.has(t));
-    const sel = s.picks[cat.key] === c.id ? 'sel' : '';
-    return `<div class="sol-card ${sel}" onclick="solPick('${cat.key}','${c.id}',this)">
-      ${isRec ? '<span class="sc-rec">推荐</span>' : ''}
-      <div class="sc-icon">${c.icon}</div>
-      <div class="sc-text">${c.text}</div>
-    </div>`;
-  }).join('');
-  document.getElementById('sol-cards').innerHTML = cardsHtml;
-
-  // Update template slots
-  renderSolSlots();
-
-  document.getElementById('sol-confirm').style.display = 'none';
+function showReelCard(reelIdx, card){
+  const strip=document.getElementById('slot-strip-'+reelIdx);
+  strip.innerHTML=`<div class="slot-card-item"><div class="sc-emoji">${card.icon}</div><div class="sc-name">${card.text}</div></div>`;
+  strip.style.transform='translateY(0)';
+  const reel=document.getElementById('slot-reel-'+reelIdx);
+  reel.classList.remove('spinning','stopping','jackpot');
 }
 
-function solPick(catKey, cardId, el){
-  const s = window._sol;
-  el.closest('.sol-cards').querySelectorAll('.sol-card').forEach(c=>c.classList.remove('sel'));
-  el.classList.add('sel');
-  s.picks[catKey] = cardId;
-  renderSolSlots();
+function spinSlot(){
+  if(window._slot && window._slot.spinning) return;
+  window._slot.spinning=true;
+  document.getElementById('sol-result').style.display='none';
+  document.getElementById('sol-spin-btn').style.display='none';
 
-  // Auto advance after short delay
+  // Pick 3 random results
+  const results=[
+    SLOT_CARDS[Math.floor(Math.random()*SLOT_CARDS.length)],
+    SLOT_CARDS[Math.floor(Math.random()*SLOT_CARDS.length)],
+    SLOT_CARDS[Math.floor(Math.random()*SLOT_CARDS.length)]
+  ];
+
+  // Start all reels spinning
+  for(let i=0;i<3;i++) startReelSpin(i);
+
+  // Stop reels sequentially
+  setTimeout(()=>stopReel(0,results[0]), 1200);
+  setTimeout(()=>stopReel(1,results[1]), 2000);
   setTimeout(()=>{
-    s.step++;
-    if(s.step >= SOL_CATEGORIES.length){
-      // All picked
-      document.getElementById('sol-cards').innerHTML = '';
-      document.getElementById('sol-cat-title').textContent = '人生场景已完成';
-      document.getElementById('sol-confirm').style.display = 'block';
-    } else {
-      renderSolStep();
-    }
-  }, 400);
+    stopReel(2,results[2]);
+    setTimeout(()=>{
+      window._slot.spinning=false;
+      window._slot.results=results;
+      G.sol.currentCards=results;
+      showSlotResult(results);
+    },700);
+  }, 2800);
 }
 
-function renderSolSlots(){
-  const s = window._sol;
-  const slots = SOL_CATEGORIES.map(cat => {
-    const picked = s.picks[cat.key];
-    if(picked){
-      const card = cat.cards.find(c=>c.id===picked);
-      return `<span class="slot">${card.icon} ${card.text}</span>`;
-    }
-    return `<span class="slot empty">${cat.title}</span>`;
-  }).join('');
-  document.getElementById('sol-slots').innerHTML = slots;
+function startReelSpin(idx){
+  const strip=document.getElementById('slot-strip-'+idx);
+  const reel=document.getElementById('slot-reel-'+idx);
+  reel.classList.add('spinning');
+  reel.classList.remove('stopping','jackpot');
+
+  // Build scrolling strip with random cards
+  let html='';
+  for(let j=0;j<30;j++){
+    const c=SLOT_CARDS[Math.floor(Math.random()*SLOT_CARDS.length)];
+    html+=`<div class="slot-card-item"><div class="sc-emoji">${c.icon}</div><div class="sc-name">${c.text}</div></div>`;
+  }
+  strip.innerHTML=html;
+
+  let pos=0;
+  const speed=8+idx*2;
+  const interval=setInterval(()=>{
+    if(!reel.classList.contains('spinning')){clearInterval(interval);return;}
+    pos+=speed;
+    if(pos>=100) pos-=100;
+    strip.style.transform=`translateY(-${pos}px)`;
+  },30);
+  reel._spinInterval=interval;
 }
 
-function finishSol(){
-  const s = window._sol;
-  // Build scene text
-  const picks = s.picks;
-  const texts = SOL_CATEGORIES.map(cat => {
-    const card = cat.cards.find(c => c.id === picks[cat.key]);
-    return card ? card.text : '';
-  });
-  G.sol.picks = { ...s.picks };
-  G.sol.scene = texts.join(' + ');
-  G.unlocked.sol = true;
-  G.unlocked.file = true;
+function stopReel(idx, finalCard){
+  const strip=document.getElementById('slot-strip-'+idx);
+  const reel=document.getElementById('slot-reel-'+idx);
+  if(reel._spinInterval) clearInterval(reel._spinInterval);
+  reel.classList.remove('spinning');
+  reel.classList.add('stopping');
+
+  // Set final card
+  strip.innerHTML=`<div class="slot-card-item"><div class="sc-emoji">${finalCard.icon}</div><div class="sc-name">${finalCard.text}</div></div>`;
+  strip.style.transform='translateY(0)';
+}
+
+function showSlotResult(cards){
+  const ids=cards.map(c=>c.id);
+  const allSame=(ids[0]===ids[1]&&ids[1]===ids[2]);
+  const twoSame=(ids[0]===ids[1]||ids[1]===ids[2]||ids[0]===ids[2]);
+
+  const resultEl=document.getElementById('sol-result');
+  const comboEl=document.getElementById('slot-combo');
+  const previewEl=document.getElementById('slot-preview');
+
+  let level, levelClass, interpretation, preview;
+
+  if(allSame){
+    level='JACKPOT';
+    levelClass='jackpot';
+    const c=cards[0];
+    interpretation=`三张「${c.text}」！触发稀有人生！`;
+    preview=`在${getPlaceForCard(c)}的世界里，你以${getIdentityForCard(c)}的身份，永远停留在${getTimeForCard(c)}。这是一段${getEmoForCard(c)}的人生。`;
+    // Jackpot glow on all reels
+    for(let i=0;i<3;i++) document.getElementById('slot-reel-'+i).classList.add('jackpot');
+    toast('JACKPOT！三张相同！');
+  } else if(twoSame){
+    level='成对';
+    levelClass='pair';
+    let pairCard, oddCard;
+    if(ids[0]===ids[1]){pairCard=cards[0];oddCard=cards[2];}
+    else if(ids[1]===ids[2]){pairCard=cards[1];oddCard=cards[0];}
+    else{pairCard=cards[0];oddCard=cards[2];}
+    interpretation=`「${pairCard.text}」× 2 + 「${oddCard.text}」`;
+    preview=`${pairCard.text}的愿望被强化了。而「${oddCard.text}」为这段人生带来了意想不到的转折。`;
+  } else {
+    level='混合人生';
+    levelClass='mix';
+    interpretation=`${cards[0].icon} ${cards[0].text} ＋ ${cards[1].icon} ${cards[1].text} ＋ ${cards[2].icon} ${cards[2].text}`;
+    preview=generateMixPreview(cards);
+  }
+
+  comboEl.innerHTML=`<div class="combo-level ${levelClass}">${level}</div><br>${interpretation}`;
+  previewEl.textContent=preview;
+  resultEl.style.display='block';
+  document.getElementById('sol-spin-btn').style.display='block';
+  document.getElementById('sol-spin-btn').innerHTML='&#127920; 再拉一次';
+
+  // Add to album
+  const entry={cards:[...cards], level, interpretation, preview, time:Date.now()};
+  window._slot.album.push(entry);
+  G.sol.album=[...window._slot.album];
+  renderSlotAlbum();
+}
+
+function generateMixPreview(cards){
+  const templates=[
+    `${cards[0].text}、${cards[1].text}和${cards[2].text}交织在一起，拼出了一段没有好好告别的人生。`,
+    `当${cards[0].text}遇上${cards[1].text}，再加上${cards[2].text}，一段意想不到的人生就此展开。`,
+    `${cards[0].text}的底色，${cards[1].text}的节奏，${cards[2].text}的结局——这是另一段你可能拥有的人生。`
+  ];
+  return templates[Math.floor(Math.random()*templates.length)];
+}
+
+function getPlaceForCard(c){
+  const map={'r':'某个温暖的地方','t':'时间的尽头','p':'记忆中的角落','i':'无人认识你的城市','e':'内心深处','f':'平行世界'};
+  return map[c.cat]||'某个地方';
+}
+function getIdentityForCard(c){
+  const map={'r':'陪伴者','t':'时间旅人','p':'归人','i':'自由的人','e':'被看见的人','f':'另一种存在'};
+  return map[c.cat]||'你自己';
+}
+function getTimeForCard(c){
+  const map={'r':'某个下午','t':'那一刻','p':'很久以后','i':'未来的某天','e':'现在','f':'永恒'};
+  return map[c.cat]||'某一天';
+}
+function getEmoForCard(c){
+  const map={'r':'温暖','t':'怀旧','p':'安静','i':'自由','e':'热烈','f':'奇幻'};
+  return map[c.cat]||'特别';
+}
+
+function favSlot(){
+  if(!window._slot||!window._slot.results.length) return;
+  const cards=window._slot.results;
+  G.sol.favorites.push([...cards]);
+  toast('已收藏到人生相册');
+}
+
+function selectSlotLife(){
+  if(!window._slot||!window._slot.results.length) return;
+  G.sol.selectedLife=[...window._slot.results];
+  G.unlocked.sol=true;
+  G.unlocked.file=true;
   backToDesk();
-  toast('平行人生场景已建立');
+  toast('已选择这段人生');
   setTimeout(()=>{
     showDeskPopup('🖼️','文件已解锁','「另一个我.jpg」已解锁！<br>点击桌面上的文件图标，恢复这段人生。');
-  }, 800);
+  },800);
 }
+
+function renderSlotAlbum(){
+  const album=window._slot.album;
+  if(!album||!album.length) return;
+  document.getElementById('sol-album').style.display='block';
+  const list=document.getElementById('slot-album-list');
+  list.innerHTML=album.map((entry,i)=>{
+    const icons=entry.cards.map(c=>c.icon).join('');
+    const tag=entry.level==='JACKPOT'?'<span class="sa-tag" style="background:#fff3e0;color:#bf360c">JP</span>':
+              entry.level==='成对'?'<span class="sa-tag" style="background:#fff3e0;color:#e65100">对</span>':
+              '<span class="sa-tag">混</span>';
+    return `<div class="slot-album-item"><span class="sa-icons">${icons}</span><span class="sa-text">${entry.interpretation}</span>${tag}</div>`;
+  }).reverse().join('');
+}
+
+function finishSol(){ backToDesk(); toast('已选择人生组合'); }
 
 // ===== MY DOCS =====
 function renderDocs(){
   const grid = document.getElementById('docs-grid');
   const photos = [
     { label:'扫雷碎片', unlocked: G.unlocked.mine, icon:'💣' },
-    { label:'情绪能量', unlocked: G.unlocked.pin, icon:'🎱' },
-    { label:'人生组合', unlocked: G.unlocked.sol, icon:'🃏' }
+    { label:'落珠能量', unlocked: G.unlocked.pin, icon:'🎱' },
+    { label:'人生组合', unlocked: G.unlocked.sol, icon:'🎰' }
   ];
   grid.innerHTML = photos.map(p => {
     const cls = p.unlocked ? 'unlocked' : 'locked';
@@ -1099,8 +1280,10 @@ function startGen(){
 // ===== RESULT =====
 function buildResult(){
   const dirName = DIR_MAP[G.mine.dir] || '真实补拍';
-  const exitName = PIN_EXITS.find(e=>e.id===G.pin.exit)?.label || '真实补拍';
-  const topEmotionLabel = PIN_BUMPERS.find(b=>b.id===G.pin.topEmotion)?.label || '自由';
+  const slotInfo = PACHINKO_SLOTS.find(s=>s.id===G.pin.slot);
+  const exitName = slotInfo ? slotInfo.label : '真实补拍';
+  const emoInfo = PACHINKO_KEYWORDS.find(k=>k.id===G.pin.topEmotion);
+  const topEmotionLabel = emoInfo ? emoInfo.label : '自由';
 
   // Archive name based on mine direction
   const archiveNames = {
@@ -1112,19 +1295,23 @@ function buildResult(){
   };
   const archiveName = archiveNames[G.mine.dir] || '平行人生存档';
 
-  // Identity based on sol picks
-  const roleCard = SOL_CATEGORIES[4].cards.find(c=>c.id===G.sol.picks.role);
-  const identity = roleCard ? roleCard.text : '自由创作者';
+  // Identity from slot machine selected life
+  const slotCards = G.sol.selectedLife || G.sol.currentCards || [];
+  const identityCard = slotCards.find(c=>c.cat==='id') || slotCards[0];
+  const identity = identityCard ? identityCard.text : '自由创作者';
 
-  // Time/world based on sol picks
-  const whereCard = SOL_CATEGORIES[2].cards.find(c=>c.id===G.sol.picks.where);
-  const whenCard = SOL_CATEGORIES[1].cards.find(c=>c.id===G.sol.picks.when);
-  const timeWorld = (whenCard?whenCard.text:'') + ' · ' + (whereCard?whereCard.text:'');
+  // Scene from slot cards
+  const scene = slotCards.map(c=>c.text).join(' · ') || '未知的人生碎片';
 
-  // Keywords
+  // Time/world from slot cards
+  const timeCard = slotCards.find(c=>c.cat==='time');
+  const placeCard = slotCards.find(c=>c.cat==='place');
+  const timeWorld = (timeCard?timeCard.text:'某一天') + ' · ' + (placeCard?placeCard.text:'某个地方');
+
+  // Keywords from all three games
   const keywords = [dirName, topEmotionLabel, exitName];
 
-  // Quote based on combination
+  // Quote
   const quotes = {
     youth: '你最想找回的不是某一天，而是<em>那个当时没有意识到会结束的自己</em>。',
     travel: '另一条路上的你，也许正在<em>过着你偶尔会梦到的生活</em>。',
@@ -1134,7 +1321,7 @@ function buildResult(){
   };
   const quote = quotes[G.mine.dir] || quotes.youth;
 
-  // Template recommendations
+  // Templates based on mine direction + slot card categories
   const tplMap = {
     youth: ['校园合照','复古胶片','青春写真','怀旧风格'],
     travel: ['旅行写真','城市街拍','自由旅拍','冒险旅途'],
@@ -1144,7 +1331,7 @@ function buildResult(){
   };
   const templates = tplMap[G.mine.dir] || tplMap.youth;
 
-  G.result = { archiveName, identity, timeWorld, keywords, quote, templates, scene: G.sol.scene };
+  G.result = { archiveName, identity, timeWorld, keywords, quote, templates, scene };
 }
 
 function showResultCards(){
@@ -1166,13 +1353,13 @@ function showResultCards(){
   const wrap = document.getElementById('res-cards-wrap');
   const photoData = [
     { scene:'扫雷碎片', label:'待补拍', icon:'📸' },
-    { scene:'情绪能量', label:'待探索', icon:'🎱' },
+    { scene:'落珠能量', label:'待探索', icon:'🎱' },
     { scene:'人生组合', label:'待想象', icon:'✨' }
   ];
   wrap.innerHTML = photoData.map((p,i)=>`
     <div class="res-card" id="rc${i}">
       <div class="res-photo"><div class="ph-ov"><div class="ph-place"><div class="fr">${p.icon}</div><div class="fl">${p.label}</div></div></div></div>
-      <div class="res-body"><div class="res-scene">${p.scene}</div><div class="res-quote">${p.scene === '扫雷碎片' ? '那些散落的碎片，拼出了<em>你最真实的模样</em>。' : p.scene === '情绪能量' ? '弹珠撞击出的，是你<em>内心深处最渴望的方向</em>。' : '纸牌组合出的，是一段<em>从未发生却一直存在的人生</em>。'}</div></div>
+      <div class="res-body"><div class="res-scene">${p.scene}</div><div class="res-quote">${p.scene === '扫雷碎片' ? '那些散落的碎片，拼出了<em>你最真实的模样</em>。' : p.scene === '落珠能量' ? '弹珠撞击出的，是你<em>内心深处最渴望的方向</em>。' : '三张卡牌组合出的，是一段<em>从未发生却一直存在的人生</em>。'}</div></div>
     </div>`).join('');
 
   // Templates
@@ -1194,7 +1381,7 @@ function showShare(){
     <h4>📸 我的平行人生存档</h4>
     <div style="text-align:center;font-size:12px;color:var(--textL);margin-bottom:12px">${r.archiveName}</div>
     <div class="share-mini"><div class="si-icon">💣</div><div class="si-text"><strong>扫雷碎片</strong>${DIR_MAP[G.mine.dir]||'真实补拍'}</div></div>
-    <div class="share-mini"><div class="si-icon">🎱</div><div class="si-text"><strong>情绪能量</strong>${PIN_BUMPERS.find(b=>b.id===G.pin.topEmotion)?.label||'自由'} · ${PIN_EXITS.find(e=>e.id===G.pin.exit)?.label||''}</div></div>
+    <div class="share-mini"><div class="si-icon">🎱</div><div class="si-text"><strong>情绪能量</strong>${PACHINKO_KEYWORDS.find(k=>k.id===G.pin.topEmotion)?.label||'自由'} · ${PACHINKO_SLOTS.find(s=>s.id===G.pin.slot)?.label||''}</div></div>
     <div class="share-mini"><div class="si-icon">🃏</div><div class="si-text"><strong>人生组合</strong>${r.scene}</div></div>
     <div style="text-align:center;margin-top:14px;font-size:12px;color:var(--text);line-height:1.8;padding:10px;background:#f8f6f2;border-radius:8px">${r.quote.replace(/<\/?em>/g,'')}</div>
     <div style="text-align:center;margin-top:14px"><button class="wbtn" onclick="closeModal('share-modal')" style="width:100%;padding:8px">关闭</button></div>
@@ -1223,8 +1410,8 @@ function showRedirect(){
 function doReplay(){
   G.unlocked = { mine:false, pin:false, sol:false, file:false };
   G.mine = { items:[], danger:null, dir:'' };
-  G.pin = { scores:{}, topEmotion:'', exit:'', total:0 };
-  G.sol = { picks:{}, scene:'' };
+  G.pin = { energy:{}, topEmotion:'', slot:'', total:0, ballCount:0 };
+  G.sol = { currentCards:[], favorites:[], selectedLife:null, album:[] };
   G.result = null;
   backToDesk();
   toast('存档已重置，重新开始冒险');
