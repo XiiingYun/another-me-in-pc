@@ -269,7 +269,7 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:-apple-system,"Ping
         <div class="ms-grid" id="ms-grid"></div>
         <div class="ms-collected" id="ms-collected"></div>
         <div class="ms-dir" id="ms-dir"></div>
-        <div style="text-align:center;margin-top:12px"><button class="wbtn wbtn-p" id="ms-done" style="width:100%;padding:10px;display:none" onclick="finishMine()">&#9654; 保存碎片，返回桌面</button></div>
+        <div style="text-align:center;margin-top:12px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button class="wbtn" id="ms-retry" style="padding:10px 20px;display:none" onclick="initMine()">&#128260; 再来一局</button><button class="wbtn wbtn-p" id="ms-done" style="padding:10px 20px;display:none" onclick="finishMine()">&#9654; 保存碎片，返回桌面</button></div>
       </div>
     </div>
   </div>
@@ -285,7 +285,7 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:-apple-system,"Ping
         <div class="pb-keywords" id="pb-kw"></div>
         <div class="pb-exit" id="pb-exit"></div>
         <div class="pb-launch"><button class="wbtn wbtn-p" id="pb-launch-btn" onclick="launchBall()" style="width:100%;padding:12px">&#128640; 发射弹珠</button></div>
-        <div style="text-align:center;margin-top:8px"><button class="wbtn" id="pb-done" style="width:100%;padding:10px;display:none" onclick="finishPin()">&#9654; 记录情绪，返回桌面</button></div>
+        <div style="text-align:center;margin-top:8px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button class="wbtn" id="pb-retry" style="padding:10px 20px;display:none" onclick="retryPin()">&#128260; 再来一局</button><button class="wbtn" id="pb-done" style="padding:10px 20px;display:none" onclick="finishPin()">&#9654; 记录情绪，返回桌面</button></div>
       </div>
     </div>
   </div>
@@ -525,42 +525,38 @@ function enterDesk(){
   go('desk');
   renderDesktop();
   setTimeout(()=> showDeskPopup('⚠','LifeOS 系统通知',
-    '检测到一份未完成的人生存档。<br><br>这台电脑里，存着另一段从未发生过的人生。<br>通过三个小游戏，你可以逐步恢复它。<br><br><span style="font-size:11px;color:var(--textL)">请按照顺序完成：人生扫雷 → 弹珠台 → 纸牌</span>'), 500);
+    '检测到一份未完成的人生存档。<br><br>这台电脑里，存着另一段从未发生过的人生。<br>通过三个小游戏，你可以逐步恢复它。<br><br><span style="font-size:11px;color:var(--textL)">完成三个游戏后，打开桌面上的「另一个我.jpg」</span>'), 500);
 }
 
 // ===== DESKTOP =====
 function renderDesktop(){
   const area = document.getElementById('desk-area');
+  const allPlayed = G.unlocked.mine && G.unlocked.pin && G.unlocked.sol;
   const icons = [
-    { id:'mine', icon:'💣', label:'人生扫雷', locked:false, done:G.unlocked.mine },
-    { id:'pin', icon:'🎱', label:'弹珠台', locked:!G.unlocked.mine, done:G.unlocked.pin },
-    { id:'sol', icon:'🃏', label:'人生纸牌', locked:!G.unlocked.pin, done:G.unlocked.sol },
-    { id:'docs', icon:'📁', label:'我的文档', locked:false, done:false },
-    { id:'trash', icon:'🗑️', label:'回收站', locked:false, done:false },
-    { id:'file', icon:'🖼️', label:'另一个我\n.jpg', locked:!G.unlocked.file, done:false }
+    { id:'mine', icon:'💣', label:'人生扫雷', locked:false, played:G.unlocked.mine },
+    { id:'pin', icon:'🎱', label:'弹珠台', locked:false, played:G.unlocked.pin },
+    { id:'sol', icon:'🃏', label:'人生纸牌', locked:false, played:G.unlocked.sol },
+    { id:'docs', icon:'📁', label:'我的文档', locked:false, played:false },
+    { id:'trash', icon:'🗑️', label:'回收站', locked:false, played:false },
+    { id:'file', icon:'🖼️', label:'另一个我\n.jpg', locked:!allPlayed, played:false }
   ];
   area.innerHTML = icons.map(i => {
     const cls = i.locked ? 'dsk-icon dim' : 'dsk-icon';
     const lock = i.locked ? '<span class="lock">🔒</span>' : '';
-    const badge = i.done ? '<span class="badge">✓</span>' : '';
+    const badge = i.played ? '<span class="badge">✓</span>' : '';
     return `<div class="${cls}" onclick="deskClick('${i.id}')">${lock}${badge}<div class="ic">${i.icon}</div><div class="lb">${i.label}</div></div>`;
   }).join('');
 }
 
 function deskClick(id){
   if(id==='mine'){ go('mine-scr'); initMine(); }
-  else if(id==='pin'){
-    if(!G.unlocked.mine){ toast('请先完成人生扫雷'); return; }
-    go('pin-scr'); initPin();
-  }
-  else if(id==='sol'){
-    if(!G.unlocked.pin){ toast('请先完成弹珠台'); return; }
-    go('sol-scr'); initSol();
-  }
+  else if(id==='pin'){ go('pin-scr'); initPin(); }
+  else if(id==='sol'){ go('sol-scr'); initSol(); }
   else if(id==='docs'){ go('docs-scr'); renderDocs(); }
   else if(id==='trash'){ showDeskPopup('🗑️','回收站','这里空空如也。<br>也许有些人生，注定不会被丢掉。'); }
   else if(id==='file'){
-    if(!G.unlocked.file){ toast('请先完成三个小游戏'); return; }
+    const allPlayed = G.unlocked.mine && G.unlocked.pin && G.unlocked.sol;
+    if(!allPlayed){ toast('先玩完三个小游戏，才能打开这个文件'); return; }
     startGen();
   }
 }
@@ -576,11 +572,11 @@ function backToDesk(){ go('desk'); renderDesktop(); }
 
 // ===== MINESWEEPER =====
 function initMine(){
-  if(G.unlocked.mine){ document.getElementById('ms-done').style.display='block'; document.getElementById('ms-done').textContent='✅ 已完成，点击返回桌面'; return; }
   const grid = document.getElementById('ms-grid');
   const collected = document.getElementById('ms-collected');
   const dirEl = document.getElementById('ms-dir');
   document.getElementById('ms-done').style.display = 'none';
+  document.getElementById('ms-retry').style.display = 'none';
   collected.innerHTML = '';
   dirEl.classList.remove('show');
   document.getElementById('ms-count').textContent = '0';
@@ -609,11 +605,20 @@ function mineTap(el, idx){
     s.gameOver = true;
     // Reveal all
     document.querySelectorAll('.ms-cell').forEach(c=>c.classList.add('rev'));
-    toast(`踩到了「${cell.name}」！但碎片已保存`);
-    setTimeout(()=>{
-      saveMineResult();
-      document.getElementById('ms-done').style.display='block';
-    }, 1200);
+    // If collected some items before hitting danger, save them
+    if(s.collected.length > 0){
+      toast(`踩到了「${cell.name}」！已收集 ${s.collected.length} 个碎片`);
+      setTimeout(()=>{
+        saveMineResult();
+        document.getElementById('ms-done').style.display='block';
+        document.getElementById('ms-retry').style.display='inline-block';
+      }, 1200);
+    } else {
+      toast(`踩到了「${cell.name}」！再试一次吧`);
+      setTimeout(()=>{
+        document.getElementById('ms-retry').style.display='inline-block';
+      }, 800);
+    }
     return;
   }
 
@@ -629,6 +634,7 @@ function mineTap(el, idx){
     s.gameOver = true;
     saveMineResult();
     document.getElementById('ms-done').style.display='block';
+    document.getElementById('ms-retry').style.display='inline-block';
     // Show direction
     const dirCounts = {};
     s.collected.forEach(c=>{ dirCounts[c.dir]=(dirCounts[c.dir]||0)+1; });
@@ -652,10 +658,13 @@ function saveMineResult(){
 function finishMine(){ backToDesk(); toast('已找到一段遗失的人生素材'); }
 
 // ===== PINBALL =====
-let pinAnim = null;
+let _pinRAF = null;
 function initPin(){
-  if(G.unlocked.pin){ document.getElementById('pb-done').style.display='block'; document.getElementById('pb-done').textContent='✅ 已完成，点击返回桌面'; return; }
+  // Cancel any running animation
+  if(_pinRAF){ cancelAnimationFrame(_pinRAF); _pinRAF = null; }
+  // Reset UI
   document.getElementById('pb-done').style.display='none';
+  document.getElementById('pb-retry').style.display='none';
   document.getElementById('pb-score').textContent='0';
   document.getElementById('pb-combo').textContent='0';
   document.getElementById('pb-kw').innerHTML='';
@@ -663,220 +672,265 @@ function initPin(){
   document.getElementById('pb-launch-btn').style.display='block';
 
   const canvas = document.getElementById('pinball-canvas');
+  if(!canvas) return;
   const ctx = canvas.getContext('2d');
+  if(!ctx) return;
   const W = canvas.width, H = canvas.height;
 
-  // Bumper positions (relative to canvas)
+  // Layout bumpers in a staggered pattern for more interesting bounces
   const bumpers = PIN_BUMPERS.map((b,i)=>({
-    ...b, x: 40 + (i%4)*80, y: 80 + Math.floor(i/4)*120, r: 28, hits: 0, flash: 0
+    ...b,
+    x: 55 + (i%3)*110 + (Math.floor(i/3)%2)*55,
+    y: 60 + Math.floor(i/3)*75,
+    r: 26, hits:0, flash:0, scale:1
   }));
+  // Obstacles between bumpers
   const obstacles = PIN_OBSTACLES.map((o,i)=>({
-    ...o, x: 60 + (i%2)*160, y: 300 + Math.floor(i/2)*50, w: 60, h: 20, hits: 0, flash: 0
+    ...o,
+    x: 70 + i*70, y: 290 + (i%2)*40,
+    w:55, h:16, hits:0, flash:0
   }));
+  // Exit gates at bottom
+  const gateW = Math.floor((W-20)/4);
   const exits = PIN_EXITS.map((e,i)=>({
-    ...e, x: 20 + i*85, y: H-30, w: 65, h: 25
+    ...e, x: 10 + i*gateW, y: H-35, w: gateW-6, h: 28
   }));
 
-  window._pin = { ctx, W, H, bumpers, obstacles, exits, ball: null, scores: {}, combo: 0, total: 0, running: false, landed: false };
-
-  // Draw static table
+  window._pin = { ctx, W, H, bumpers, obstacles, exits, ball:null, particles:[],
+    scores:{}, combo:0, total:0, running:false, landed:false, frame:0 };
   drawPinTable();
 }
 
+function rr(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.lineTo(x+w-r,y);c.quadraticCurveTo(x+w,y,x+w,y+r);c.lineTo(x+w,y+h-r);c.quadraticCurveTo(x+w,y+h,x+w-r,y+h);c.lineTo(x+r,y+h);c.quadraticCurveTo(x,y+h,x,y+h-r);c.lineTo(x,y+r);c.quadraticCurveTo(x,y,x+r,y);c.closePath();}
+
 function drawPinTable(){
   const p = window._pin;
+  if(!p || !p.ctx) return;
   const {ctx,W,H} = p;
   ctx.clearRect(0,0,W,H);
 
-  // Background gradient
+  // Dark gradient background
   const bg = ctx.createLinearGradient(0,0,0,H);
-  bg.addColorStop(0,'#1a1a3e');
-  bg.addColorStop(1,'#0d0d2b');
-  ctx.fillStyle = bg;
-  ctx.fillRect(0,0,W,H);
+  bg.addColorStop(0,'#141428');bg.addColorStop(1,'#0a0a1e');
+  ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
 
-  // Grid lines
-  ctx.strokeStyle='rgba(100,100,200,.08)';
-  ctx.lineWidth=1;
-  for(let x=0;x<W;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
-  for(let y=0;y<H;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+  // Subtle grid
+  ctx.strokeStyle='rgba(80,80,180,.06)';ctx.lineWidth=1;
+  for(let x=0;x<W;x+=35){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+  for(let y=0;y<H;y+=35){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
 
-  // Walls
-  ctx.strokeStyle='#4466aa';ctx.lineWidth=3;
-  ctx.strokeRect(4,4,W-8,H-8);
+  // Border walls (glowing)
+  ctx.strokeStyle='#3355aa';ctx.lineWidth=3;ctx.strokeRect(3,3,W-6,H-6);
+  ctx.strokeStyle='rgba(60,100,200,.2)';ctx.lineWidth=6;ctx.strokeRect(1,1,W-2,H-2);
 
-  // Bumpers
+  // Bumpers (with glow and scale animation)
   p.bumpers.forEach(b=>{
-    ctx.beginPath();
-    ctx.arc(b.x,b.y,b.r,0,Math.PI*2);
-    ctx.fillStyle = b.flash > 0 ? '#ffdd44' : '#3355aa';
-    ctx.fill();
-    ctx.strokeStyle = b.flash > 0 ? '#ffee88' : '#6688cc';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-    ctx.fillStyle = '#fff';
-    ctx.font = '18px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(b.emoji, b.x, b.y);
-    ctx.font = '9px sans-serif';
-    ctx.fillStyle = 'rgba(255,255,255,.7)';
-    ctx.fillText(b.label, b.x, b.y + b.r + 10);
-    if(b.flash > 0) b.flash--;
+    const glow = b.flash > 0;
+    const sc = b.scale || 1;
+    const r = b.r * sc;
+    // Outer glow
+    if(glow){
+      ctx.beginPath();ctx.arc(b.x,b.y,r+8,0,Math.PI*2);
+      ctx.fillStyle='rgba(255,220,60,.15)';ctx.fill();
+    }
+    // Main circle
+    ctx.beginPath();ctx.arc(b.x,b.y,r,0,Math.PI*2);
+    const grad = ctx.createRadialGradient(b.x-4,b.y-4,2,b.x,b.y,r);
+    if(glow){ grad.addColorStop(0,'#ffee66');grad.addColorStop(1,'#cc8800'); }
+    else { grad.addColorStop(0,'#4477cc');grad.addColorStop(1,'#223366'); }
+    ctx.fillStyle=grad;ctx.fill();
+    ctx.strokeStyle=glow?'#ffee88':'#5588bb';ctx.lineWidth=2;ctx.stroke();
+    // Emoji
+    ctx.fillStyle='#fff';ctx.font='16px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(b.emoji,b.x,b.y);
+    // Label below
+    ctx.font='8px sans-serif';ctx.fillStyle='rgba(255,255,255,.6)';
+    ctx.fillText(b.label,b.x,b.y+r+10);
+    // Animate flash/scale
+    if(b.flash>0) b.flash--;
+    if(sc>1) b.scale = Math.max(1, sc - 0.05);
   });
 
   // Obstacles
   p.obstacles.forEach(o=>{
-    ctx.fillStyle = o.flash > 0 ? '#ff4444' : '#553333';
-    ctx.strokeStyle = o.flash > 0 ? '#ff8888' : '#884444';
-    ctx.lineWidth = 2;
-    roundRect(ctx, o.x - o.w/2, o.y - o.h/2, o.w, o.h, 6);
-    ctx.fill(); ctx.stroke();
-    ctx.fillStyle = '#fff';
-    ctx.font = '14px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(o.emoji, o.x, o.y);
-    if(o.flash > 0) o.flash--;
+    const glow = o.flash > 0;
+    ctx.fillStyle=glow?'#cc3333':'#3a2222';
+    ctx.strokeStyle=glow?'#ff6666':'#664444';ctx.lineWidth=2;
+    rr(ctx,o.x-o.w/2,o.y-o.h/2,o.w,o.h,5);ctx.fill();ctx.stroke();
+    ctx.fillStyle='#fff';ctx.font='12px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(o.emoji,o.x,o.y);
+    if(o.flash>0) o.flash--;
   });
 
   // Exit gates
   p.exits.forEach(e=>{
-    ctx.fillStyle = '#223355';
-    ctx.strokeStyle = '#4466aa';
-    ctx.lineWidth = 2;
-    roundRect(ctx, e.x, e.y, e.w, e.h, 4);
-    ctx.fill(); ctx.stroke();
-    ctx.fillStyle = '#aaccff';
-    ctx.font = '10px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(e.emoji + e.label, e.x + e.w/2, e.y + e.h/2);
+    ctx.fillStyle='#1a2244';ctx.strokeStyle='#3355aa';ctx.lineWidth=2;
+    rr(ctx,e.x,e.y,e.w,e.h,4);ctx.fill();ctx.stroke();
+    ctx.fillStyle='#88aadd';ctx.font='9px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(e.emoji+e.label,e.x+e.w/2,e.y+e.h/2);
   });
 
-  // Ball
+  // Particles
+  p.particles.forEach(pt=>{
+    ctx.globalAlpha=pt.life;
+    ctx.fillStyle=pt.color;
+    ctx.beginPath();ctx.arc(pt.x,pt.y,pt.r,0,Math.PI*2);ctx.fill();
+    ctx.globalAlpha=1;
+  });
+
+  // Ball (with trail)
   if(p.ball){
-    const b = p.ball;
-    ctx.beginPath();
-    ctx.arc(b.x, b.y, b.r, 0, Math.PI*2);
-    ctx.fillStyle = '#ffcc00';
-    ctx.fill();
-    ctx.strokeStyle = '#ffee88';
-    ctx.lineWidth = 2;
-    ctx.stroke();
+    const b=p.ball;
     // Trail
-    ctx.beginPath();
-    ctx.arc(b.x - b.vx*0.3, b.y - b.vy*0.3, b.r*0.7, 0, Math.PI*2);
-    ctx.fillStyle = 'rgba(255,200,0,.3)';
-    ctx.fill();
+    for(let i=1;i<=3;i++){
+      const tx=b.x-b.vx*i*0.4, ty=b.y-b.vy*i*0.4;
+      ctx.beginPath();ctx.arc(tx,ty,b.r*(1-i*0.2),0,Math.PI*2);
+      ctx.fillStyle=`rgba(255,200,0,${0.15-i*0.04})`;ctx.fill();
+    }
+    // Main ball
+    const bg2=ctx.createRadialGradient(b.x-3,b.y-3,1,b.x,b.y,b.r);
+    bg2.addColorStop(0,'#ffee44');bg2.addColorStop(1,'#cc8800');
+    ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,Math.PI*2);
+    ctx.fillStyle=bg2;ctx.fill();
+    ctx.strokeStyle='#ffee88';ctx.lineWidth=1.5;ctx.stroke();
+    // Shine
+    ctx.beginPath();ctx.arc(b.x-3,b.y-3,b.r*0.35,0,Math.PI*2);
+    ctx.fillStyle='rgba(255,255,255,.4)';ctx.fill();
+  }
+
+  // "Ready" text when no ball
+  if(!p.ball && !p.landed){
+    ctx.fillStyle='rgba(255,255,255,.15)';ctx.font='14px sans-serif';ctx.textAlign='center';
+    ctx.fillText('点击下方按钮发射弹珠',W/2,H-60);
   }
 }
 
-function roundRect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();}
-
 function launchBall(){
   const p = window._pin;
-  if(p.running) return;
+  if(!p || p.running) return;
+  // Cancel any stale animation frame
+  if(_pinRAF){ cancelAnimationFrame(_pinRAF); _pinRAF = null; }
   document.getElementById('pb-launch-btn').style.display='none';
-  p.ball = { x: p.W/2, y: p.H - 50, vx: (Math.random()-0.5)*3, vy: -12 - Math.random()*3, r: 10 };
+  // Launch ball upward with random angle
+  const angle = -Math.PI/2 + (Math.random()-0.5)*0.6; // mostly upward
+  const speed = 11 + Math.random()*3;
+  p.ball = { x:p.W/2, y:p.H-55, vx:Math.cos(angle)*speed, vy:Math.sin(angle)*speed, r:9 };
   p.running = true;
   p.landed = false;
   p.combo = 0;
-  requestAnimationFrame(pinLoop);
+  p.frame = 0;
+  _pinRAF = requestAnimationFrame(pinLoop);
 }
 
 function pinLoop(){
   const p = window._pin;
-  if(!p.running) return;
-  const b = p.ball;
+  if(!p || !p.running || !p.ball){ return; }
+  try {
+    const b = p.ball;
+    p.frame++;
 
-  // Physics
-  b.vy += 0.18; // gravity
-  b.vx *= 0.998;
-  b.vy *= 0.998;
-  b.x += b.vx;
-  b.y += b.vy;
+    // Physics: gravity + mild air drag
+    b.vy += 0.22;
+    b.vx *= 0.999;
+    b.vy *= 0.999;
+    b.x += b.vx;
+    b.y += b.vy;
 
-  // Wall bounce
-  if(b.x - b.r < 4){ b.x = b.r + 4; b.vx = Math.abs(b.vx) * 0.8; }
-  if(b.x + b.r > p.W - 4){ b.x = p.W - b.r - 4; b.vx = -Math.abs(b.vx) * 0.8; }
-  if(b.y - b.r < 4){ b.y = b.r + 4; b.vy = Math.abs(b.vy) * 0.8; }
+    // Wall bounces (elastic)
+    if(b.x-b.r < 5){ b.x=b.r+5; b.vx=Math.abs(b.vx)*0.85; }
+    if(b.x+b.r > p.W-5){ b.x=p.W-b.r-5; b.vx=-Math.abs(b.vx)*0.85; }
+    if(b.y-b.r < 5){ b.y=b.r+5; b.vy=Math.abs(b.vy)*0.85; }
 
-  // Bumper collision
-  p.bumpers.forEach(bmp=>{
-    const dx = b.x - bmp.x, dy = b.y - bmp.y;
-    const dist = Math.sqrt(dx*dx + dy*dy);
-    if(dist < b.r + bmp.r){
-      // Bounce
-      const nx = dx/dist, ny = dy/dist;
-      const dot = b.vx*nx + b.vy*ny;
-      b.vx -= 2*dot*nx; b.vy -= 2*dot*ny;
-      b.vx *= 1.05; b.vy *= 1.05;
-      // Separate
-      const overlap = b.r + bmp.r - dist;
-      b.x += nx * overlap; b.y += ny * overlap;
-      // Score
-      bmp.hits++;
-      bmp.flash = 10;
-      p.scores[bmp.id] = (p.scores[bmp.id]||0) + 10;
-      p.combo++;
-      p.total += 10;
-      document.getElementById('pb-score').textContent = p.total;
-      document.getElementById('pb-combo').textContent = p.combo;
-      updatePinKeywords();
-    }
-  });
-
-  // Obstacle collision
-  p.obstacles.forEach(obs=>{
-    const cx = Math.max(obs.x - obs.w/2, Math.min(b.x, obs.x + obs.w/2));
-    const cy = Math.max(obs.y - obs.h/2, Math.min(b.y, obs.y + obs.h/2));
-    const dx = b.x - cx, dy = b.y - cy;
-    const dist = Math.sqrt(dx*dx+dy*dy);
-    if(dist < b.r){
-      const nx = dx/dist||0, ny = dy/dist||1;
-      b.vx -= 2*(b.vx*nx+b.vy*ny)*nx;
-      b.vy -= 2*(b.vx*nx+b.vy*ny)*ny;
-      b.vx *= 0.6; b.vy *= 0.6;
-      b.x += nx*(b.r-dist); b.y += ny*(b.r-dist);
-      obs.hits++;
-      obs.flash = 8;
-      p.combo = 0;
-      document.getElementById('pb-combo').textContent = p.combo;
-    }
-  });
-
-  // Exit gate check
-  if(b.y + b.r > p.H - 10){
-    let hitExit = null;
-    p.exits.forEach(e=>{
-      if(b.x > e.x && b.x < e.x + e.w) hitExit = e;
+    // Bumper collisions (satisfying bounce)
+    p.bumpers.forEach(bmp=>{
+      const dx=b.x-bmp.x, dy=b.y-bmp.y;
+      const dist=Math.sqrt(dx*dx+dy*dy);
+      const minDist = b.r + bmp.r;
+      if(dist < minDist && dist > 0.1){
+        const nx=dx/dist, ny=dy/dist;
+        // Reflect velocity
+        const dot = b.vx*nx + b.vy*ny;
+        b.vx -= 2*dot*nx;
+        b.vy -= 2*dot*ny;
+        // Add bounce force (makes it feel alive!)
+        const boost = 1.15 + Math.random()*0.1;
+        b.vx *= boost; b.vy *= boost;
+        // Push ball out of bumper
+        const overlap = minDist - dist + 1;
+        b.x += nx*overlap; b.y += ny*overlap;
+        // Score + effects
+        bmp.hits++; bmp.flash=12; bmp.scale=1.2;
+        p.scores[bmp.id]=(p.scores[bmp.id]||0)+10;
+        p.combo++; p.total+=10;
+        document.getElementById('pb-score').textContent=p.total;
+        document.getElementById('pb-combo').textContent=p.combo;
+        updatePinKeywords();
+        // Spawn particles
+        for(let i=0;i<6;i++){
+          p.particles.push({x:bmp.x+nx*bmp.r, y:bmp.y+ny*bmp.r,
+            vx:(Math.random()-0.5)*4+nx*2, vy:(Math.random()-0.5)*4+ny*2,
+            r:2+Math.random()*2, life:1, color:'#ffdd44'});
+        }
+      }
     });
-    if(!hitExit){
-      // Fell through gap: assign random exit
-      hitExit = p.exits[Math.floor(Math.random()*p.exits.length)];
-    }
-    p.running = false;
-    p.landed = true;
-    savePinResult(hitExit);
-    drawPinTable();
-    const exitEl = document.getElementById('pb-exit');
-    exitEl.innerHTML = `${hitExit.emoji} 弹珠落入：<strong>${hitExit.label}</strong>`;
-    exitEl.classList.add('show');
-    document.getElementById('pb-done').style.display='block';
-    document.getElementById('pb-done').innerHTML = '&#9654; 记录情绪，返回桌面';
-    return;
-  }
 
-  drawPinTable();
-  if(p.running) requestAnimationFrame(pinLoop);
+    // Obstacle collisions (absorbs energy)
+    p.obstacles.forEach(obs=>{
+      const hw=obs.w/2, hh=obs.h/2;
+      const cx=Math.max(obs.x-hw,Math.min(b.x,obs.x+hw));
+      const cy=Math.max(obs.y-hh,Math.min(b.y,obs.y+hh));
+      const dx=b.x-cx, dy=b.y-cy;
+      const dist=Math.sqrt(dx*dx+dy*dy);
+      if(dist < b.r && dist > 0.1){
+        const nx=dx/dist, ny=dy/dist;
+        const dot=b.vx*nx+b.vy*ny;
+        b.vx -= 2*dot*nx; b.vy -= 2*dot*ny;
+        b.vx *= 0.65; b.vy *= 0.65;
+        b.x += nx*(b.r-dist+1); b.y += ny*(b.r-dist+1);
+        obs.hits++; obs.flash=8;
+        p.combo=0;
+        document.getElementById('pb-combo').textContent=p.combo;
+      }
+    });
+
+    // Update particles
+    p.particles = p.particles.filter(pt=>{
+      pt.x+=pt.vx; pt.y+=pt.vy; pt.vy+=0.1;
+      pt.life-=0.04; pt.r*=0.97;
+      return pt.life > 0;
+    });
+
+    // Exit gate check (ball falls below table)
+    if(b.y - b.r > p.H - 5){
+      let hitExit = null;
+      p.exits.forEach(e=>{
+        if(b.x > e.x && b.x < e.x + e.w) hitExit = e;
+      });
+      if(!hitExit) hitExit = p.exits[Math.floor(Math.random()*p.exits.length)];
+      p.running = false;
+      p.landed = true;
+      p.ball = null;
+      savePinResult(hitExit);
+      drawPinTable();
+      const exitEl = document.getElementById('pb-exit');
+      exitEl.innerHTML = `${hitExit.emoji} 弹珠落入：<strong>${hitExit.label}</strong>`;
+      exitEl.classList.add('show');
+      document.getElementById('pb-done').style.display='block';
+      document.getElementById('pb-retry').style.display='inline-block';
+      _pinRAF = null;
+      return;
+    }
+
+    drawPinTable();
+  } catch(e){ console.error('Pinball loop error:', e); p.running = false; }
+  if(p.running) _pinRAF = requestAnimationFrame(pinLoop);
 }
 
 function updatePinKeywords(){
   const p = window._pin;
+  if(!p) return;
   const sorted = Object.entries(p.scores).sort((a,b)=>b[1]-a[1]);
-  const kwEl = document.getElementById('pb-kw');
-  kwEl.innerHTML = sorted.map(([id])=>{
+  document.getElementById('pb-kw').innerHTML = sorted.map(([id])=>{
     const bmp = PIN_BUMPERS.find(b=>b.id===id);
     return bmp ? `<span>${bmp.emoji} ${bmp.label}</span>` : '';
   }).join('');
@@ -885,18 +939,34 @@ function updatePinKeywords(){
 function savePinResult(exit){
   const p = window._pin;
   const sorted = Object.entries(p.scores).sort((a,b)=>b[1]-a[1]);
-  G.pin.scores = p.scores;
+  G.pin.scores = {...p.scores};
   G.pin.total = p.total;
   G.pin.exit = exit.id;
   G.pin.topEmotion = sorted.length ? sorted[0][0] : 'free';
   G.unlocked.pin = true;
 }
 
+function retryPin(){
+  if(_pinRAF){ cancelAnimationFrame(_pinRAF); _pinRAF = null; }
+  const p = window._pin;
+  if(!p) return;
+  p.ball=null; p.running=false; p.landed=false; p.combo=0;
+  p.particles=[];
+  // Reset bumper states
+  p.bumpers.forEach(b=>{b.flash=0;b.scale=1;});
+  p.obstacles.forEach(o=>{o.flash=0;});
+  document.getElementById('pb-retry').style.display='none';
+  document.getElementById('pb-done').style.display='none';
+  document.getElementById('pb-exit').classList.remove('show');
+  document.getElementById('pb-launch-btn').style.display='block';
+  drawPinTable();
+}
+
 function finishPin(){ backToDesk(); toast('已捕获一段未发生的人生情绪'); }
 
 // ===== SOLITAIRE =====
 function initSol(){
-  if(G.unlocked.sol){ document.getElementById('sol-confirm').style.display='block'; return; }
+  document.getElementById('sol-confirm').style.display = 'none';
   window._sol = { step: 0, picks: {} };
   renderSolStep();
 }
