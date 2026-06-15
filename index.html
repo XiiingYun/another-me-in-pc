@@ -157,9 +157,6 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:-apple-system,"Ping
 .slot-album-item .sa-text{flex:1;line-height:1.4}
 .slot-album-item .sa-tag{font-size:9px;padding:1px 6px;border-radius:8px;background:#eef6ff;color:var(--wt);flex-shrink:0}
 .sol-confirm{text-align:center;margin-top:12px}
-.slot-reel.locked{outline:2px solid #ff6b6b;outline-offset:-2px;opacity:.85}
-.slot-reel.locked::after{content:'🔒';position:absolute;top:4px;right:4px;font-size:12px;z-index:3}
-.sol-discover-bar{text-align:center;margin:4px 0;font-size:10px;color:var(--textL)}
 
 /* ===== MY DOCS ===== */
 .docs-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:12px 0}
@@ -318,8 +315,7 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:-apple-system,"Ping
     <div class="win" style="max-width:400px">
       <div class="win-t"><span>&#127183; 平行人生三牌老虎机</span><div class="dots"><div class="d" onclick="backToDesk()">&#10005;</div></div></div>
       <div class="win-b" id="sol-body">
-        <div class="sol-info"><h3>平行人生三牌老虎机</h3><p>三张相同触发稀有人生！</p></div>
-        <div class="pb-status" style="justify-content:center;gap:12px"><span id="sol-discover" style="font-size:11px;color:var(--textL)">已发现 0/30 种平行人生</span><span id="sol-rewrite-info" style="font-size:11px;color:var(--wt);display:none">改写机会: <span id="sol-rewrite-count">1</span>次</span></div>
+        <div class="sol-info"><h3>平行人生三牌老虎机</h3><p>三张相同触发稀有人生！想抽就抽，想存就存。</p></div>
         <div class="slot-frame">
           <div class="slot-reels" id="slot-reels">
             <div class="slot-reel" id="slot-reel-0"><div class="slot-reel-strip" id="slot-strip-0"></div></div>
@@ -327,21 +323,17 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:-apple-system,"Ping
             <div class="slot-reel" id="slot-reel-2"><div class="slot-reel-strip" id="slot-strip-2"></div></div>
           </div>
         </div>
-        <div id="sol-lock-area" style="text-align:center;margin:8px 0;display:none">
-          <button class="wbtn" id="sol-lock-btn" onclick="toggleLockCard()" style="padding:6px 14px;font-size:11px">&#128274; 锁定第一张再抽</button>
-        </div>
         <div class="sol-confirm" id="sol-spin-wrap"><button class="wbtn wbtn-p" id="sol-spin-btn" style="width:100%;padding:14px;font-size:16px" onclick="spinSlot()">&#127920; 拉动摇杆</button></div>
         <div class="slot-result" id="sol-result" style="display:none">
           <div class="slot-combo" id="sol-combo"></div>
           <div class="slot-preview" id="sol-preview"></div>
           <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;justify-content:center">
-            <button class="wbtn" onclick="favSlot()" style="padding:8px 16px">&#11088; 收藏</button>
-            <button class="wbtn" onclick="spinSlot()" style="padding:8px 16px">&#128260; 再抽一次</button>
-            <button class="wbtn wbtn-p" onclick="selectSlotLife()" style="padding:8px 16px">&#9654; 选择这段人生</button>
+            <button class="wbtn" onclick="spinSlot()" style="padding:10px 20px">&#128260; 再抽一次</button>
+            <button class="wbtn wbtn-p" onclick="selectSlotLife()" style="padding:10px 20px">&#9654; 保存结果，返回桌面</button>
           </div>
         </div>
         <div class="slot-album" id="sol-album" style="display:none">
-          <div style="font-size:11px;color:var(--textL);margin-bottom:6px;letter-spacing:1px">&#128214; 人生相册</div>
+          <div style="font-size:11px;color:var(--textL);margin-bottom:6px;letter-spacing:1px">&#128214; 已抽取的人生</div>
           <div class="slot-album-list" id="sol-album-list"></div>
         </div>
       </div>
@@ -1195,47 +1187,17 @@ function initSol(){
   document.getElementById('sol-album').style.display='none';
   document.getElementById('sol-spin-btn').style.display='block';
   document.getElementById('sol-spin-btn').innerHTML='&#127920; 拉动摇杆';
-  document.getElementById('sol-lock-area').style.display='none';
-  document.getElementById('sol-rewrite-info').style.display='none';
-  // Remove locked class from all reels
   for(let i=0;i<3;i++){
-    document.getElementById('slot-reel-'+i).classList.remove('locked');
+    document.getElementById('slot-reel-'+i).classList.remove('locked','jackpot');
     showReelCard(i, SLOT_CARDS[Math.floor(Math.random()*SLOT_CARDS.length)]);
   }
-  window._slot = { spinning:false, results:[], album:[], lockedReel:-1, spinCount:0, rewriteUsed:0, discovered:new Set() };
-  // Restore discovered from G
+  window._slot = { spinning:false, results:[], album:[] };
+  // Restore album from G
   if(G.sol.album && G.sol.album.length){
-    G.sol.album.forEach(e=>{
-      if(e.cards) e.cards.forEach(c=>{ if(c.id) window._slot.discovered.add(c.id); });
-    });
+    window._slot.album = [...G.sol.album];
+    renderSlotAlbum();
   }
-  updateDiscovery();
   G.sol.currentCards=[];
-}
-
-function updateDiscovery(){
-  const s = window._slot;
-  if(!s) return;
-  const count = s.discovered.size;
-  document.getElementById('sol-discover').textContent = `已发现 ${count}/24 种人生碎片`;
-}
-
-function toggleLockCard(){
-  const s = window._slot;
-  if(!s || s.spinning) return;
-  if(s.lockedReel >= 0){
-    // Unlock
-    document.getElementById('slot-reel-'+s.lockedReel).classList.remove('locked');
-    s.lockedReel = -1;
-    document.getElementById('sol-lock-btn').innerHTML='&#128274; 锁定第一张再抽';
-    toast('已取消锁定');
-  } else {
-    // Lock first reel
-    s.lockedReel = 0;
-    document.getElementById('slot-reel-0').classList.add('locked');
-    document.getElementById('sol-lock-btn').innerHTML='&#128275; 已锁定，点击取消';
-    toast('已锁定第一张卡牌');
-  }
 }
 
 function showReelCard(reelIdx, card){
@@ -1251,55 +1213,31 @@ function spinSlot(){
   window._slot.spinning=true;
   document.getElementById('sol-result').style.display='none';
   document.getElementById('sol-spin-btn').style.display='none';
-  document.getElementById('sol-lock-area').style.display='none';
+  // Remove jackpot glow from previous spin
+  for(let i=0;i<3;i++) document.getElementById('slot-reel-'+i).classList.remove('jackpot');
 
   // Pick 3 random results
-  let results=[
+  const results=[
     SLOT_CARDS[Math.floor(Math.random()*SLOT_CARDS.length)],
     SLOT_CARDS[Math.floor(Math.random()*SLOT_CARDS.length)],
     SLOT_CARDS[Math.floor(Math.random()*SLOT_CARDS.length)]
   ];
 
-  // If a reel is locked, keep its current card
-  const s = window._slot;
-  if(s.lockedReel >= 0){
-    const lockedCard = s.results[s.lockedReel] || SLOT_CARDS[0];
-    results[s.lockedReel] = lockedCard;
-  }
+  // Start all reels spinning
+  for(let i=0;i<3;i++) startReelSpin(i);
 
-  // Start spinning - skip locked reel
-  for(let i=0;i<3;i++){
-    if(s.lockedReel === i) continue;
-    startReelSpin(i);
-  }
-
-  // Stop reels sequentially (skip locked)
-  const delays = [1200, 2000, 2800];
-  for(let i=0;i<3;i++){
-    if(s.lockedReel === i) continue;
-    const delay = i===0?1200:i===1?2000:2800;
-    setTimeout(((idx,card)=>()=>stopReel(idx,card))(i,results[i]), delay);
-  }
-
-  // Final result
-  const finalDelay = s.lockedReel===2 ? 2100 : s.lockedReel===1 ? 2900 : 3500;
+  // Stop reels sequentially
+  setTimeout(()=>stopReel(0,results[0]), 1200);
+  setTimeout(()=>stopReel(1,results[1]), 2000);
   setTimeout(()=>{
-    window._slot.spinning=false;
-    window._slot.results=results;
-    window._slot.spinCount++;
-    G.sol.currentCards=results;
-    // Track discovered cards
-    results.forEach(c=>{ if(c.id) window._slot.discovered.add(c.id); });
-    updateDiscovery();
-    // Show lock area for next spin
-    document.getElementById('sol-lock-area').style.display='block';
-    // Show rewrite chance after 3 spins
-    if(window._slot.spinCount >= 3 && window._slot.rewriteUsed < 1){
-      document.getElementById('sol-rewrite-info').style.display='inline';
-      document.getElementById('sol-rewrite-count').textContent = '1';
-    }
-    showSlotResult(results);
-  }, finalDelay);
+    stopReel(2,results[2]);
+    setTimeout(()=>{
+      window._slot.spinning=false;
+      window._slot.results=results;
+      G.sol.currentCards=results;
+      showSlotResult(results);
+    },700);
+  }, 2800);
 }
 
 function startReelSpin(idx){
@@ -1377,55 +1315,15 @@ function showSlotResult(cards){
 
   comboEl.innerHTML=`<div class="combo-level ${levelClass}">${level}</div><br>${interpretation}`;
   previewEl.textContent=preview;
-  resultEl.style.display='block';
+  document.getElementById('sol-result').style.display='block';
   document.getElementById('sol-spin-btn').style.display='block';
   document.getElementById('sol-spin-btn').innerHTML='&#127920; 再拉一次';
-
-  // Build action buttons - include rewrite chance if available
-  let extraBtns = '';
-  if(window._slot && window._slot.spinCount >= 3 && window._slot.rewriteUsed < 1){
-    extraBtns = `<button class="wbtn" onclick="rewriteSlot()" style="padding:8px 16px">&#9999; 改写一张</button>`;
-  }
-  const btnWrap = resultEl.querySelector('div[style*="flex"]');
-  if(btnWrap){
-    btnWrap.innerHTML = extraBtns +
-      `<button class="wbtn" onclick="favSlot()" style="padding:8px 16px">&#11088; 收藏</button>` +
-      `<button class="wbtn" onclick="spinSlot()" style="padding:8px 16px">&#128260; 再抽一次</button>` +
-      `<button class="wbtn wbtn-p" onclick="selectSlotLife()" style="padding:8px 16px">&#9654; 选择这段人生</button>`;
-  }
 
   // Add to album
   const entry={cards:[...cards], level, interpretation, preview, time:Date.now()};
   window._slot.album.push(entry);
   G.sol.album=[...window._slot.album];
   renderSlotAlbum();
-}
-
-// Rewrite chance: let user pick one reel to re-spin
-function rewriteSlot(){
-  if(!window._slot || window._slot.rewriteUsed >= 1) return;
-  window._slot.rewriteUsed++;
-  document.getElementById('sol-rewrite-info').style.display='none';
-  toast('点击一张卡牌来改写它');
-  const reels = document.querySelectorAll('.slot-reel');
-  const handler = function(e){
-    const reel = e.target.closest('.slot-reel');
-    if(!reel) return;
-    const idx = parseInt(reel.id.split('-')[2]);
-    const newCard = SLOT_CARDS[Math.floor(Math.random()*SLOT_CARDS.length)];
-    startReelSpin(idx);
-    setTimeout(()=>{
-      stopReel(idx, newCard);
-      const results = [...window._slot.results];
-      results[idx] = newCard;
-      window._slot.results = results;
-      window._slot.discovered.add(newCard.id);
-      updateDiscovery();
-      setTimeout(()=> showSlotResult(results), 700);
-    }, 1000);
-    reels.forEach(r=>r.removeEventListener('click', handler));
-  };
-  reels.forEach(r=>r.addEventListener('click', handler));
 }
 
 function generateMixPreview(cards){
@@ -1452,13 +1350,6 @@ function getTimeForCard(c){
 function getEmoForCard(c){
   const map={'r':'温暖','t':'怀旧','p':'安静','i':'自由','e':'热烈','f':'奇幻'};
   return map[c.cat]||'特别';
-}
-
-function favSlot(){
-  if(!window._slot||!window._slot.results.length) return;
-  const cards=window._slot.results;
-  G.sol.favorites.push([...cards]);
-  toast('已收藏到人生相册');
 }
 
 function selectSlotLife(){
