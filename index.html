@@ -144,7 +144,7 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:-apple-system,"Ping
 .slot-reel.stopping .slot-reel-strip{transition:transform .6s cubic-bezier(.2,.8,.3,1.2)}
 .slot-reel.jackpot{animation:jackpotGlow .5s ease infinite alternate}
 @keyframes jackpotGlow{from{box-shadow:inset 0 0 10px rgba(255,200,0,.3),0 0 8px rgba(255,200,0,.2)}to{box-shadow:inset 0 0 20px rgba(255,200,0,.5),0 0 16px rgba(255,200,0,.4)}}
-.slot-result{background:var(--paper);border:2px solid #e0dcd4;border-radius:10px;padding:14px;margin-top:12px;animation:popIn .4s ease}
+.slot-result{background:var(--paper);border:2px solid #e0dcd4;border-radius:10px;padding:14px;margin-top:12px;animation:fadeUp .4s ease}
 .slot-combo{font-size:13px;color:var(--text);line-height:1.8;text-align:center}
 .slot-combo .combo-level{display:inline-block;padding:2px 10px;border-radius:12px;font-size:11px;font-weight:700;margin-bottom:6px}
 .slot-combo .combo-level.mix{background:#eef6ff;color:var(--wt)}
@@ -325,7 +325,7 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:-apple-system,"Ping
         </div>
         <div class="pb-keywords" id="pb-kw"></div>
         <div class="pb-exit" id="pb-exit"></div>
-        <div class="pb-launch"><button class="wbtn wbtn-p" id="pb-launch-btn" onclick="launchPachinkoBall()" style="width:100%;padding:12px">&#127921; 释放弹珠</button></div>
+        <div class="pb-launch"><button class="wbtn wbtn-p" id="pb-launch-btn" onclick="launchPachinkoBall()" style="width:100%;padding:12px">&#127921; 释放弹珠</button><div id="pb-aim-hint" style="text-align:center;font-size:10px;color:var(--textL);margin-top:4px">👆 点击画面上方，选择弹珠落点位置</div></div>
         <div style="text-align:center;margin-top:8px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button class="wbtn" id="pb-retry" style="padding:10px 20px;display:none" onclick="retryPachinko()">&#128260; 再来一局</button><button class="wbtn" id="pb-done" style="padding:10px 20px;display:none" onclick="finishPin()">&#9654; 记录能量，返回桌面</button></div>
       </div>
     </div>
@@ -860,10 +860,17 @@ function drawPachinko(){
 
   // Aim indicator
   if(p.dropReady && p.ballsLeft>0){
-    ctx.beginPath();ctx.arc(p.aimX,15,6,0,Math.PI*2);
-    ctx.fillStyle='rgba(255,200,0,.6)';ctx.fill();
-    ctx.strokeStyle='rgba(255,200,0,.3)';ctx.lineWidth=1;
-    ctx.beginPath();ctx.moveTo(p.aimX,22);ctx.lineTo(p.aimX,38);ctx.stroke();
+    // Drop zone highlight
+    ctx.fillStyle='rgba(255,200,0,.06)';
+    ctx.fillRect(0,0,W,42);
+    // Aim arrow and dot
+    ctx.beginPath();ctx.arc(p.aimX,16,8,0,Math.PI*2);
+    ctx.fillStyle='rgba(255,200,0,.7)';ctx.fill();
+    ctx.strokeStyle='rgba(255,200,0,.4)';ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.moveTo(p.aimX,25);ctx.lineTo(p.aimX,38);ctx.stroke();
+    // Aim hint text
+    ctx.fillStyle='rgba(255,200,0,.5)';ctx.font='10px sans-serif';ctx.textAlign='center';
+    ctx.fillText('◀ 点击左右移动 ▶',p.aimX,54);
   }
 
   // Pegs
@@ -946,37 +953,23 @@ function drawPachinko(){
 
   // Remaining balls indicator
   if(p.ballsLeft>0 && !p.ball){
-    ctx.fillStyle='rgba(255,255,255,.12)';ctx.font='12px sans-serif';ctx.textAlign='center';
-    ctx.fillText('点击画面上方释放弹珠',W/2,H-55);
+    ctx.fillStyle='rgba(255,255,255,.15)';ctx.font='11px sans-serif';ctx.textAlign='center';
+    ctx.fillText('点击画面上方瞄准，再按下方释放',W/2,H-55);
   }
 }
 
 function launchPachinkoBall(){
   const p = window._pk;
   if(!p || p.ball || p.ballsLeft<=0) return;
-  // Show emotional prompt
-  const promptIdx = Math.min(p.ballsDropped, PACHINKO_PROMPTS.length-1);
-  const wrap = document.getElementById('pb-wrap');
-  // Remove old prompts
-  wrap.querySelectorAll('.pb-prompt').forEach(e=>e.remove());
-  const promptEl = document.createElement('div');
-  promptEl.className = 'pb-prompt';
-  promptEl.textContent = PACHINKO_PROMPTS[promptIdx];
-  wrap.appendChild(promptEl);
-  // Delay ball launch until prompt fades
   document.getElementById('pb-launch-btn').style.display='none';
-  setTimeout(()=>{
-    if(!p || p.ball) return;
-    p.ball = { x:p.aimX, y:18, vx:(Math.random()-0.5)*1.5, vy:1, r:PK_BALL_R };
-    p.running = true;
-    p.dropReady = false;
-    p.trail = [];
-    p.stuckTimer = 0;
-    p.lastPos = {x:p.ball.x, y:p.ball.y};
-    p.stuckPushCount = 0;
-    _pachRAF = requestAnimationFrame(pachinkoLoop);
-    if(promptEl.parentNode) promptEl.remove();
-  }, 2200);
+  p.ball = { x:p.aimX, y:18, vx:(Math.random()-0.5)*1.5, vy:1, r:PK_BALL_R };
+  p.running = true;
+  p.dropReady = false;
+  p.trail = [];
+  p.stuckTimer = 0;
+  p.lastPos = {x:p.ball.x, y:p.ball.y};
+  p.stuckPushCount = 0;
+  _pachRAF = requestAnimationFrame(pachinkoLoop);
 }
 
 function pachinkoLoop(){
