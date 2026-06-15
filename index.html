@@ -331,6 +331,7 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:-apple-system,"Ping
             <button class="wbtn" onclick="spinSlot()" style="padding:10px 20px">&#128260; 再抽一次</button>
             <button class="wbtn wbtn-p" onclick="selectSlotLife()" style="padding:10px 20px">&#9654; 保存结果，返回桌面</button>
           </div>
+          <div style="text-align:center;margin-top:8px"><button class="wbtn" onclick="retrySlot()" style="padding:8px 16px;font-size:11px">&#128260; 再来一局（清空记录）</button></div>
         </div>
         <div class="slot-album" id="sol-album" style="display:none">
           <div style="font-size:11px;color:var(--textL);margin-bottom:6px;letter-spacing:1px">&#128214; 已抽取的人生</div>
@@ -727,14 +728,14 @@ document.addEventListener('click', function(e){
     const rect = canvas.getBoundingClientRect();
     const scaleX = canvas.width / rect.width;
     const x = (e.clientX - rect.left) * scaleX;
-    window._pk.aimX = Math.max(15, Math.min(canvas.width-15, x));
+    window._pk.aimX = Math.max(20, Math.min(canvas.width-20, x));
     if(window._pk.dropReady && !window._pk.ball) drawPachinko();
   }
 });
 
 // ===== PACHINKO 落珠机 =====
 let _pachRAF = null;
-const PK_ROWS = 10, PK_COLS = 7, PK_PEG_R = 5, PK_BALL_R = 7;
+const PK_ROWS = 10, PK_COLS = 7, PK_PEG_R = 5, PK_BALL_R = 5;
 
 function initPin(){
   if(_pachRAF){ cancelAnimationFrame(_pachRAF); _pachRAF = null; }
@@ -757,16 +758,16 @@ function initPin(){
   if(!ctx) return;
   const W = canvas.width, H = canvas.height;
 
-  // Build peg grid
+  // Build peg grid (wider margins to prevent edge sticking)
   const pegs = [];
   const startY = 55, endY = H - 70;
   const rowH = (endY - startY) / (PK_ROWS - 1);
-  const colW = (W - 40) / (PK_COLS - 1);
+  const colW = (W - 60) / (PK_COLS - 1);
   for(let r=0; r<PK_ROWS; r++){
     const offset = (r%2===0) ? 0 : colW/2;
     const cols = (r%2===0) ? PK_COLS : PK_COLS-1;
     for(let c=0; c<cols; c++){
-      pegs.push({ x: 20 + c*colW + offset, y: startY + r*rowH, r: PK_PEG_R, flash:0 });
+      pegs.push({ x: 30 + c*colW + offset, y: startY + r*rowH, r: PK_PEG_R, flash:0 });
     }
   }
 
@@ -776,7 +777,7 @@ function initPin(){
     const col = (i%2===0) ? 2 : 4;
     return {
       ...kw,
-      x: 20 + col*colW, y: startY + row*rowH + rowH/2,
+      x: 30 + col*colW, y: startY + row*rowH + rowH/2,
       r: 20, hits:0, flash:0, scale:1
     };
   });
@@ -954,10 +955,10 @@ function pachinkoLoop(){
     b.x += b.vx;
     b.y += b.vy;
 
-    // Anti-stuck detection
+    // Anti-stuck detection (more aggressive thresholds)
     const dx_stuck = b.x - p.lastPos.x, dy_stuck = b.y - p.lastPos.y;
     const moved = Math.sqrt(dx_stuck*dx_stuck + dy_stuck*dy_stuck);
-    if(moved < 0.5){
+    if(moved < 1.0){
       p.stuckTimer += 16; // ~60fps → ~16ms per frame
     } else {
       p.stuckTimer = 0;
@@ -965,18 +966,18 @@ function pachinkoLoop(){
     }
     p.lastPos = {x:b.x, y:b.y};
 
-    // After 1.5s stuck → gentle push down + random side
-    if(p.stuckTimer > 1500 && p.stuckPushCount < 3){
-      b.vy += 3;
-      b.vx += (Math.random()-0.5)*4;
+    // After 800ms stuck → strong push down + random side
+    if(p.stuckTimer > 800 && p.stuckPushCount < 5){
+      b.vy += 4;
+      b.vx += (Math.random()-0.5)*6;
       p.stuckPushCount++;
-      p.stuckTimer = 1000; // Reset partially so it tries push again if still stuck
+      p.stuckTimer = 400;
     }
-    // After 3s stuck → teleport to nearest safe position below
-    if(p.stuckTimer > 3000){
-      b.y += 40;
-      b.vy = 2;
-      b.vx = (Math.random()-0.5)*3;
+    // After 1.5s stuck → teleport below
+    if(p.stuckTimer > 1500){
+      b.y += 50;
+      b.vy = 3;
+      b.vx = (Math.random()-0.5)*4;
       p.stuckTimer = 0;
       p.stuckPushCount = 0;
     }
@@ -987,10 +988,10 @@ function pachinkoLoop(){
     p.trail.forEach(t=>t.life-=0.06);
     p.trail = p.trail.filter(t=>t.life>0);
 
-    // Wall bounce
-    if(b.x-b.r<4){b.x=b.r+4;b.vx=Math.abs(b.vx)*0.7;}
-    if(b.x+b.r>p.W-4){b.x=p.W-b.r-4;b.vx=-Math.abs(b.vx)*0.7;}
-    if(b.y-b.r<4){b.y=b.r+4;b.vy=Math.abs(b.vy)*0.5;}
+    // Wall bounce (wider margins to prevent edge sticking)
+    if(b.x-b.r<10){b.x=b.r+10;b.vx=Math.abs(b.vx)*0.7+0.5;}
+    if(b.x+b.r>p.W-10){b.x=p.W-b.r-10;b.vx=-Math.abs(b.vx)*0.7-0.5;}
+    if(b.y-b.r<6){b.y=b.r+6;b.vy=Math.abs(b.vy)*0.5;}
 
     // Peg collisions
     p.pegs.forEach(pg=>{
@@ -1364,6 +1365,22 @@ function selectSlotLife(){
       showDeskPopup('🖼️','文件已解锁','「另一个我.jpg」已解锁！<br>点击桌面上的文件图标，恢复这段人生。');
     },800);
   }
+}
+
+function retrySlot(){
+  window._slot.album=[];
+  G.sol.album=[];
+  G.sol.currentCards=[];
+  G.sol.selectedLife=null;
+  document.getElementById('sol-album').style.display='none';
+  document.getElementById('sol-result').style.display='none';
+  document.getElementById('sol-spin-btn').style.display='block';
+  document.getElementById('sol-spin-btn').innerHTML='&#127920; 拉动摇杆';
+  for(let i=0;i<3;i++){
+    document.getElementById('slot-reel-'+i).classList.remove('jackpot');
+    showReelCard(i, SLOT_CARDS[Math.floor(Math.random()*SLOT_CARDS.length)]);
+  }
+  toast('已清空记录，重新开始');
 }
 
 function renderSlotAlbum(){
